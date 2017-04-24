@@ -1,0 +1,19 @@
+{
+  "name": "discord-coc-war-details",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/spAnser/discord-coc-war-details.git"
+  },
+  "author": "spAnser",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/spAnser/discord-coc-war-details/issues"
+  },
+  "homepage": "https://github.com/spAnser/discord-coc-war-details",
+  "dependencies": {
+    "simple-get": "^2.6.0"
+  }
+}
