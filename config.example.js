@@ -1,4 +1,15 @@
 module.exports = {
-  API_KEY: '',
-  clanTags: []
+  asyncLimit: 5,
+  clans: [
+    {
+      tag: '',
+      channelId: ''
+    }
+  ],
+  coc: {
+    apiKey: '',
+  },
+  discord: {
+    userToken: ''
+  }
 }
