@@ -86,12 +86,12 @@ let discordAttackMessage = (warId, clanTag, opponentTag, attackData, channelId) 
   let attackMessage = (attackData.stars > 0) ? emojis.dwasword : emojis.dwaswordbroken
   let defendMessage = (attackData.stars > 0) ? emojis.dwashieldbroken : emojis.dwashield
   if (attackData.fresh) {
-    attackMessage += ':leaves:'
+    attackMessage += '\uD83C\uDF43' //🍃
   }
-  if (attackDir === 'down') {
-    attackMessage += ':small_red_triangle_down:'
-  } else if (attackDir === 'up') {
-    attackMessage += ':small_red_triangle:'
+  if (attackDir === 'up') {
+    attackMessage += '\uD83D\uDD3A' // 🔺
+  } else if (attackDir === 'down') {
+    attackMessage += '\uD83D\uDD3B' // 🔻
   }
   const embed = new Discord.RichEmbed()
   .setTitle(Clans[clanTag] + ' vs ' + Clans[opponentTag])
