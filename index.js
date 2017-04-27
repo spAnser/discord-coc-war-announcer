@@ -5,6 +5,15 @@ console.log('\x1Bc')
 const LOG = true
 const DEBUG = false
 
+if (!String.prototype.splice) {
+  String.prototype.splice = function(start, delCount, newSubStr) {
+    return this.slice(0, start) + newSubStr + this.slice(start + Math.abs(delCount))
+  }
+}
+let fixISO = str => {
+  return str.splice(13, 0, ':').splice(11, 0, ':').splice(6, 0, '-').splice(4, 0, '-')
+}
+
 let log = message => {
   if (LOG) console.log((message) ? message : '')
 }
@@ -36,18 +45,26 @@ const COC_API_BASE = 'https://api.clashofclans.com/v1'
 
 let DiscordChannels = {}
 let DiscordChannelEmojis = {}
+let DiscordTownHallEmojis = [
+  '<:townhall1:307293097405054976>',
+  '<:townhall2:307293097748987904>',
+  '<:townhall3:307293098260824085>',
+  '<:townhall4:307293098495442945>',
+  '<:townhall5:307293098592174083>',
+  '<:townhall6:307293098797563906>',
+  '<:townhall7:307293099028119552>',
+  '<:townhall8:307293099145822208>',
+  '<:townhall9:307293099162599424>',
+  '<:townhall10:307293099808260096>',
+  '<:townhall11:307293099174920192>',
+]
 
 let Clans = {}
 let Players = {}
 
 storage.initSync()
 
-const StarColors = [
-  0xff484e,
-  0xffbc48,
-  0xc7ff48,
-  0x4dff48
-]
+const StarColors = config.starColors
 
 let getClanChannel = (clanTag, done) => {
   config.clans.forEach(clan => {
@@ -58,8 +75,9 @@ let getClanChannel = (clanTag, done) => {
   return false
 }
 
-let discordAttackMessage = (warId, clanTag, opponentTag, attackData, channelId) => {
-  debug(clanTag, attackData)
+let discordAttackMessage = (warId, WarData, clanTag, opponentTag, attackData, channelId) => {
+  debug(clanTag)
+  debug(attackData)
   let emojis = DiscordChannelEmojis[channelId]
   let clanPlayer
   let opponentPlayer
@@ -95,12 +113,27 @@ let discordAttackMessage = (warId, clanTag, opponentTag, attackData, channelId) 
   }
   const embed = new Discord.RichEmbed()
   .setTitle(Clans[clanTag] + ' vs ' + Clans[opponentTag])
-  .setColor(StarColors[2])
+  .setColor(StarColors[attackData.stars])
   .addField(clanPlayer.name, (attackData.who === 'clan') ? attackMessage : defendMessage, true)
-  .addField('[' + clanPlayer.mapPosition + '] vs [' + opponentPlayer.mapPosition + ']', emojis.dwastar.repeat(attackData.stars-attackData.newStars) + emojis.dwastarnew.repeat(attackData.newStars) + emojis.dwastarempty.repeat(3 - attackData.stars) + '\n\t\t  ' + attackData.destructionPercentage + '%', true)
+  .addField(DiscordTownHallEmojis[clanPlayer.townhallLevel - 1] + ' ' + clanPlayer.mapPosition + ' vs ' + opponentPlayer.mapPosition + ' ' + DiscordTownHallEmojis[opponentPlayer.townhallLevel - 1], emojis.dwastar.repeat(attackData.stars-attackData.newStars) + emojis.dwastarnew.repeat(attackData.newStars) + emojis.dwastarempty.repeat(3 - attackData.stars) + '\n\t\t' + attackData.destructionPercentage + '%', true)
   .addField(opponentPlayer.name, (attackData.who === 'clan') ? defendMessage : attackMessage, true)
 
-  storage.setItemSync(warId,{ lastReportedAttack: attackData.order })
+  WarData.lastReportedAttack = attackData.order
+  storage.setItemSync(warId, WarData)
+  DiscordChannels[channelId].sendEmbed(embed)
+}
+
+let discordReportMessage = (warId, WarData, clanTag, opponentTag, message, channelId) => {
+  debug(clanTag)
+  let emojis = DiscordChannelEmojis[channelId]
+  let clanPlayer
+  let opponentPlayer
+  const embed = new Discord.RichEmbed()
+  .setTitle(Clans[clanTag] + ' vs ' + Clans[opponentTag])
+  .setColor(message.color)
+  .addField(message.title, message.body)
+
+  storage.setItemSync(warId, WarData)
   DiscordChannels[channelId].sendEmbed(embed)
 }
 
@@ -148,8 +181,8 @@ let discordReady = () => {
         sha1.update(clanTag + opponentTag + data.preparationStartTime)
         let warId = sha1.digest('hex')
         let WarData = storage.getItemSync(warId)
-        if (!WarData) WarData = { lastReportedAttack: 0 }
-        log(warId)
+        if (!WarData) WarData = { lastReportedAttack: 0, prepDayReported: false, battleDayReported: false, lastHourReported: false, finalMinutesReported: false }
+        log('War ID: ' + warId)
         if (data.clan.name) {
           Clans[clanTag] = data.clan.name
         }
@@ -158,7 +191,7 @@ let discordReady = () => {
         }
         debug(data.clan.name ? (data.clan.tag + ' ' + data.clan.name) : data.clan.tag)
         debug(data.opponent.name ? (data.opponent.tag + ' ' + data.opponent.name) : data.opponent.tag)
-        log(data.state)
+        debug('State: ' + data.state)
         let tmpAttacks = {}
         data.clan.members.forEach(member => {
           Players[member.tag] = member
@@ -198,21 +231,50 @@ let discordReady = () => {
           }
           attacks.push(Object.assign(attack, {newStars: newStars, fresh: fresh}))
         })
+        // let prepStartTime = new Date(fixISO(data.preparationStartTime))
+        let startTime = new Date(fixISO(data.startTime))
+        let endTime = new Date(fixISO(data.endTime))
+        let prepTime = startTime - new Date()
+        let remainingTime = endTime - new Date()
+        if (data.state == 'preparation') {
+          if (!WarData.prepDayReported) {
+            getClanChannel(clanTag, channelId => {
+              let message = config.messages.prepDay
+              message.body = message.body.replace('%date%', startTime.toDateString()).replace('%time%', startTime.toTimeString())
+              WarData.prepDayReported = true
+              discordReportMessage(warId, WarData, clanTag, opponentTag, message, channelId)
+            })
+          }
+        } else if (data.state == 'inWar') {
+          if (!WarData.battleDayReported) {
+            getClanChannel(clanTag, channelId => {
+              let message = config.messages.battleDay
+              WarData.battleDayReported = true
+              discordReportMessage(warId, WarData, clanTag, opponentTag, message, channelId)
+            })
+          }
+          if (!WarData.lastHourReported && remainingTime < 60 * 60 * 1000) {
+            getClanChannel(clanTag, channelId => {
+              let message = config.messages.lastHour
+              WarData.lastHourReported = true
+              discordReportMessage(warId, WarData, clanTag, opponentTag, message, channelId)
+            })
+          }
+          if (!WarData.finalMinutesReported && remainingTime < config.finalMinutes * 60 * 1000) {
+            getClanChannel(clanTag, channelId => {
+              let message = config.messages.finalMinutes
+              WarData.finalMinutesReported = true
+              discordReportMessage(warId, WarData, clanTag, opponentTag, message, channelId)
+            })
+          }
+        }
         let reportFrom = WarData.lastReportedAttack
         debug(util.inspect(attacks.slice(reportFrom), { depth: null, colors: true }))
         attacks.slice(reportFrom).forEach(attack => {
           getClanChannel(clanTag, channelId => {
-            discordAttackMessage(warId, clanTag, opponentTag, attack, channelId)
+            discordAttackMessage(warId, WarData, clanTag, opponentTag, attack, channelId)
           })
         })
-
-        if (data.state == 'preparation') {
-          log('Starts: ' + data.startTime)
-        } else if (data.state == 'inWar') {
-          log('Ends: ' + data.endTime)
-          debug(data.clan.members)
-        }
-        log()
         done()
       }
       debug(util.inspect(data, { depth: null, colors: true }))
