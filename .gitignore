@@ -1,2 +1,3 @@
+.node-persist
 node_modules/
 /config.js

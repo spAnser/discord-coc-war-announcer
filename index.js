@@ -1,24 +1,46 @@
 'use strict'
 
+console.log('\x1Bc')
+
+const LOG = true
+const DEBUG = false
+
+let log = message => {
+  if (LOG) console.log((message) ? message : '')
+}
+
+let debug = message => {
+  if (DEBUG) console.log(chalk.yellow('DEBUG:'), message)
+}
+
 const crypto = require('crypto')
 const util = require('util')
 
 const async = require('async')
+const chalk = require('chalk')
 const Discord = require('discord.js')
 const get = require('simple-get')
+const storage = require('node-persist')
+
+console.log(chalk.cyan('-'.repeat(17)))
+console.log(chalk.cyan(' Discord War Bot '))
+console.log(chalk.cyan('-'.repeat(17)))
 
 const config = require('./config')
+log(chalk.bold('Server Permission URL:'))
+log(chalk.magenta.bold('https://discordapp.com/oauth2/authorize?client_id=' + config.discord.clientId + '&scope=bot&permissions=134208\n'))
+
 const DiscordClient = new Discord.Client()
 
 const COC_API_BASE = 'https://api.clashofclans.com/v1'
 
 let DiscordChannels = {}
+let DiscordChannelEmojis = {}
 
 let Clans = {}
 let Players = {}
-let WarData = {}
 
-console.log('https://discordapp.com/oauth2/authorize?client_id=' + config.discord.clientId + '&scope=bot&permissions=134208')
+storage.initSync()
 
 const StarColors = [
   0xff484e,
@@ -36,8 +58,9 @@ let getClanChannel = (clanTag, done) => {
   return false
 }
 
-let discordAttackMessage = (clanTag, opponentTag, attackData) => {
-  console.log(clanTag, attackData)
+let discordAttackMessage = (warId, clanTag, opponentTag, attackData, channelId) => {
+  debug(clanTag, attackData)
+  let emojis = DiscordChannelEmojis[channelId]
   let clanPlayer
   let opponentPlayer
   let attackDir = 'across'
@@ -60,8 +83,8 @@ let discordAttackMessage = (clanTag, opponentTag, attackData) => {
   } else {
     return
   }
-  let attackMessage = ':crossed_swords:'
-  let defendMessage = ':shield:'
+  let attackMessage = (attackData.stars > 0) ? emojis.dwasword : emojis.dwaswordbroken
+  let defendMessage = (attackData.stars > 0) ? emojis.dwashieldbroken : emojis.dwashield
   if (attackData.fresh) {
     attackMessage += ':leaves:'
   }
@@ -74,12 +97,11 @@ let discordAttackMessage = (clanTag, opponentTag, attackData) => {
   .setTitle(Clans[clanTag] + ' vs ' + Clans[opponentTag])
   .setColor(StarColors[2])
   .addField(clanPlayer.name, (attackData.who === 'clan') ? attackMessage : defendMessage, true)
-  .addField('[' + clanPlayer.mapPosition + '] vs [' + opponentPlayer.mapPosition + ']', ':star:'.repeat(attackData.stars-attackData.newStars) + ':star2:'.repeat(attackData.newStars) + '\n\t\t  ' + attackData.destructionPercentage + '%', true)
+  .addField('[' + clanPlayer.mapPosition + '] vs [' + opponentPlayer.mapPosition + ']', emojis.dwastar.repeat(attackData.stars-attackData.newStars) + emojis.dwastarnew.repeat(attackData.newStars) + emojis.dwastarempty.repeat(3 - attackData.stars) + '\n\t\t  ' + attackData.destructionPercentage + '%', true)
   .addField(opponentPlayer.name, (attackData.who === 'clan') ? defendMessage : attackMessage, true)
 
-  getClanChannel(clanTag, channelId => {
-    // DiscordChannels[channelId].sendEmbed(embed)
-  })
+  storage.setItemSync(warId,{ lastReportedAttack: attackData.order })
+  DiscordChannels[channelId].sendEmbed(embed)
 }
 
 let discordReady = () => {
@@ -125,17 +147,18 @@ let discordReady = () => {
         let opponentTag = data.opponent.tag
         sha1.update(clanTag + opponentTag + data.preparationStartTime)
         let warId = sha1.digest('hex')
-        if (!WarData[warId]) WarData[warId] = { lastReportedAttack: 0 }
-        console.log(warId)
+        let WarData = storage.getItemSync(warId)
+        if (!WarData) WarData = { lastReportedAttack: 0 }
+        log(warId)
         if (data.clan.name) {
           Clans[clanTag] = data.clan.name
         }
         if (data.opponent.name) {
           Clans[opponentTag] = data.opponent.name
         }
-        // console.log(data.clan.name ? (data.clan.tag + ' ' + data.clan.name) : data.clan.tag)
-        // console.log(data.opponent.name ? (data.opponent.tag + ' ' + data.opponent.name) : data.opponent.tag)
-        console.log(data.state)
+        debug(data.clan.name ? (data.clan.tag + ' ' + data.clan.name) : data.clan.tag)
+        debug(data.opponent.name ? (data.opponent.tag + ' ' + data.opponent.name) : data.opponent.tag)
+        log(data.state)
         let tmpAttacks = {}
         data.clan.members.forEach(member => {
           Players[member.tag] = member
@@ -153,7 +176,7 @@ let discordReady = () => {
             })
           }
         })
-        // console.log(util.inspect(players, { depth: null, colors: true }))
+        debug(util.inspect(Players, { depth: null, colors: true }))
         let attacks = []
         let earnedStars = {}
         let attacked = {}
@@ -175,29 +198,38 @@ let discordReady = () => {
           }
           attacks.push(Object.assign(attack, {newStars: newStars, fresh: fresh}))
         })
-        let reportFrom = WarData[warId].lastReportedAttack
-        // console.log(util.inspect(attacks.slice(reportFrom), { depth: null, colors: true }))
+        let reportFrom = WarData.lastReportedAttack
+        debug(util.inspect(attacks.slice(reportFrom), { depth: null, colors: true }))
         attacks.slice(reportFrom).forEach(attack => {
-          discordAttackMessage(clanTag, opponentTag, attack)
+          getClanChannel(clanTag, channelId => {
+            discordAttackMessage(warId, clanTag, opponentTag, attack, channelId)
+          })
         })
 
         if (data.state == 'preparation') {
-          console.log('Starts:', data.startTime)
+          log('Starts: ' + data.startTime)
         } else if (data.state == 'inWar') {
-          console.log('Ends:', data.endTime)
-          // console.log(data.clan.members)
+          log('Ends: ' + data.endTime)
+          debug(data.clan.members)
         }
-        console.log()
+        log()
         done()
       }
-      // console.log(util.inspect(data, { depth: null, colors: true }))
+      debug(util.inspect(data, { depth: null, colors: true }))
     })
+  }, function(err) {
+    setTimeout(discordReady, 1000 * config.updateInterval)
   })
 }
 
 DiscordClient.on('ready', () => {
   DiscordClient.channels.forEach(channel => {
     DiscordChannels[channel.id] = channel
+    DiscordChannelEmojis[channel.id] = {}
+    debug(channel.guild.emojis)
+    channel.guild.emojis.map(emoji => {
+      DiscordChannelEmojis[channel.id][emoji.name] = '<:' + emoji.name + ':' + emoji.id + '>'
+    })
   })
   discordReady()
 })

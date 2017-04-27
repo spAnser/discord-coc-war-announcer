@@ -1,5 +1,6 @@
 module.exports = {
   asyncLimit: 5,
+  updateInterval: 90,
   clans: [
     {
       tag: '',
@@ -10,6 +11,7 @@ module.exports = {
     apiKey: '',
   },
   discord: {
+    clientId: '',
     userToken: ''
   }
 }
