@@ -1,18 +1,18 @@
 {
-  "name": "discord-coc-war-details",
+  "name": "discord-coc-war-announcer",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/spAnser/discord-coc-war-details.git"
+    "url": "git+https://github.com/spAnser/discord-coc-war-announcer.git"
   },
   "author": "spAnser",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/spAnser/discord-coc-war-details/issues"
+    "url": "https://github.com/spAnser/discord-coc-war-announcer/issues"
   },
-  "homepage": "https://github.com/spAnser/discord-coc-war-details",
+  "homepage": "https://github.com/spAnser/discord-coc-war-announcer",
   "dependencies": {
     "async": "^2.3.0",
     "chalk": "^1.1.3",
