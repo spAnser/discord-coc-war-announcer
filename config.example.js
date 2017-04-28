@@ -1,6 +1,6 @@
 module.exports = {
   asyncLimit: 5,
-  updateInterval: 90,
+  updateInterval: 60 * 2, // 2 Minutes
   clans: [
     {
       tag: '',
