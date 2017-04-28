@@ -104,7 +104,7 @@ let discordAttackMessage = (warId, WarData, clanTag, opponentTag, attackData, ch
   let attackMessage = (attackData.stars > 0) ? emojis.dwasword : emojis.dwaswordbroken
   let defendMessage = (attackData.stars > 0) ? emojis.dwashieldbroken : emojis.dwashield
   if (attackData.fresh) {
-    attackMessage += '\uD83C\uDF43' //🍃
+    attackMessage += '\uD83C\uDF43' // 🍃
   }
   if (attackDir === 'up') {
     attackMessage += '\uD83D\uDD3A' // 🔺
@@ -174,7 +174,7 @@ let discordReady = () => {
 
   async.each(config.clans, (clan, done) => {
     getCurrentWar(clan.tag, data => {
-      if (data) {
+      if (data && data.reason != 'accessDenied') {
         let sha1 = crypto.createHash('sha1')
         let clanTag = data.clan.tag
         let opponentTag = data.opponent.tag
@@ -245,28 +245,27 @@ let discordReady = () => {
               discordReportMessage(warId, WarData, clanTag, opponentTag, message, channelId)
             })
           }
-        } else if (data.state == 'inWar') {
-          if (!WarData.battleDayReported) {
-            getClanChannel(clanTag, channelId => {
-              let message = config.messages.battleDay
-              WarData.battleDayReported = true
-              discordReportMessage(warId, WarData, clanTag, opponentTag, message, channelId)
-            })
-          }
-          if (!WarData.lastHourReported && remainingTime < 60 * 60 * 1000) {
-            getClanChannel(clanTag, channelId => {
-              let message = config.messages.lastHour
-              WarData.lastHourReported = true
-              discordReportMessage(warId, WarData, clanTag, opponentTag, message, channelId)
-            })
-          }
-          if (!WarData.finalMinutesReported && remainingTime < config.finalMinutes * 60 * 1000) {
-            getClanChannel(clanTag, channelId => {
-              let message = config.messages.finalMinutes
-              WarData.finalMinutesReported = true
-              discordReportMessage(warId, WarData, clanTag, opponentTag, message, channelId)
-            })
-          }
+        }
+        if (!WarData.battleDayReported && startTime < new Date()) {
+          getClanChannel(clanTag, channelId => {
+            let message = config.messages.battleDay
+            WarData.battleDayReported = true
+            discordReportMessage(warId, WarData, clanTag, opponentTag, message, channelId)
+          })
+        }
+        if (!WarData.lastHourReported && remainingTime < 60 * 60 * 1000) {
+          getClanChannel(clanTag, channelId => {
+            let message = config.messages.lastHour
+            WarData.lastHourReported = true
+            discordReportMessage(warId, WarData, clanTag, opponentTag, message, channelId)
+          })
+        }
+        if (!WarData.finalMinutesReported && remainingTime < config.finalMinutes * 60 * 1000) {
+          getClanChannel(clanTag, channelId => {
+            let message = config.messages.finalMinutes
+            WarData.finalMinutesReported = true
+            discordReportMessage(warId, WarData, clanTag, opponentTag, message, channelId)
+          })
         }
         let reportFrom = WarData.lastReportedAttack
         debug(util.inspect(attacks.slice(reportFrom), { depth: null, colors: true }))
@@ -275,6 +274,9 @@ let discordReady = () => {
             discordAttackMessage(warId, WarData, clanTag, opponentTag, attack, channelId)
           })
         })
+        done()
+      } else if (data && data.reason == 'accessDenied') {
+        log(chalk.red.bold(clan.tag + ' War Log is not public'))
         done()
       }
       debug(util.inspect(data, { depth: null, colors: true }))
@@ -292,6 +294,28 @@ DiscordClient.on('ready', () => {
     channel.guild.emojis.map(emoji => {
       DiscordChannelEmojis[channel.id][emoji.name] = '<:' + emoji.name + ':' + emoji.id + '>'
     })
+    /* Setup Fallback Emojis */
+    if (!DiscordChannelEmojis[channel.id]['dwashield']) {
+      DiscordChannelEmojis[channel.id]['dwashield'] = '<:dwashield:306956561266507786>'
+    }
+    if (!DiscordChannelEmojis[channel.id]['dwashieldbroken']) {
+      DiscordChannelEmojis[channel.id]['dwashieldbroken'] = '<:dwashieldbroken:306956561073438720>'
+    }
+    if (!DiscordChannelEmojis[channel.id]['dwasword']) {
+      DiscordChannelEmojis[channel.id]['dwasword'] = '<:dwasword:306956560695951362>'
+    }
+    if (!DiscordChannelEmojis[channel.id]['dwaswordbroken']) {
+      DiscordChannelEmojis[channel.id]['dwaswordbroken'] = '<:dwaswordbroken:306956561073307648>'
+    }
+    if (!DiscordChannelEmojis[channel.id]['dwastarempty']) {
+      DiscordChannelEmojis[channel.id]['dwastarempty'] = '<:dwastarempty:306956560779706370>'
+    }
+    if (!DiscordChannelEmojis[channel.id]['dwastar']) {
+      DiscordChannelEmojis[channel.id]['dwastar'] = '<:dwastar:306956561056530442>'
+    }
+    if (!DiscordChannelEmojis[channel.id]['dwastarnew']) {
+      DiscordChannelEmojis[channel.id]['dwastarnew'] = '<:dwastarnew:306956560855465995>'
+    }
   })
   discordReady()
 })
