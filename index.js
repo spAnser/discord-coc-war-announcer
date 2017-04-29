@@ -60,6 +60,7 @@ let DiscordTownHallEmojis = [
 ]
 
 let Clans = {}
+let WarIds = {}
 let Players = {}
 
 storage.initSync()
@@ -70,6 +71,15 @@ let getClanChannel = (clanTag, done) => {
   config.clans.forEach(clan => {
     if (clan.tag === clanTag) {
       done(clan.channelId)
+    }
+  })
+  return false
+}
+
+let getChannelClan = (channelId, done) => {
+  config.clans.forEach(clan => {
+    if (clan.channelId === channelId) {
+      done(clan.tag)
     }
   })
   return false
@@ -123,6 +133,20 @@ let discordAttackMessage = (warId, WarData, clanTag, opponentTag, attackData, ch
   DiscordChannels[channelId].sendEmbed(embed)
 }
 
+let discordStatsMessage = (warId, WarData, channelId) => {
+  debug(warId)
+  debug(WarData)
+  let emojis = DiscordChannelEmojis[channelId]
+  const embed = new Discord.RichEmbed()
+  .setTitle(WarData.stats.clan.name + ' vs ' + WarData.stats.opponent.name)
+  .setColor(0x007cff)
+  .addField(WarData.stats.clan.attacks + '/' + WarData.stats.clan.memberCount * 2 + ' ' + emojis.dwasword, WarData.stats.clan.destructionPercentage + '%', true)
+  .addField(WarData.stats.clan.memberCount + ' v ' + WarData.stats.opponent.memberCount, WarData.stats.clan.stars + ' ' + emojis.dwastarnew + ' vs ' + emojis.dwastarnew + ' ' + WarData.stats.opponent.stars, true)
+  .addField(WarData.stats.opponent.attacks + '/' + WarData.stats.opponent.memberCount * 2 + ' ' + emojis.dwasword, WarData.stats.opponent.destructionPercentage + '%', true)
+
+  DiscordChannels[channelId].sendEmbed(embed)
+}
+
 let discordReportMessage = (warId, WarData, clanTag, opponentTag, message, channelId) => {
   debug(clanTag)
   let emojis = DiscordChannelEmojis[channelId]
@@ -143,7 +167,8 @@ let discordReady = () => {
       url: task.url,
       method: 'GET',
       headers: {
-        'authorization': 'Bearer ' + config.coc.apiKey
+        'authorization': 'Bearer ' + config.coc.apiKey,
+        'Cache-Control':'no-cache'
       }
     }, function (err, res, jsonBuffer) {
       cb()
@@ -180,9 +205,10 @@ let discordReady = () => {
         let opponentTag = data.opponent.tag
         sha1.update(clanTag + opponentTag + data.preparationStartTime)
         let warId = sha1.digest('hex')
+        WarIds[clanTag] = warId
         let WarData = storage.getItemSync(warId)
         if (!WarData) WarData = { lastReportedAttack: 0, prepDayReported: false, battleDayReported: false, lastHourReported: false, finalMinutesReported: false }
-        log('War ID: ' + warId)
+        log('War ID: ' + warId + ' ' + clanTag)
         if (data.clan.name) {
           Clans[clanTag] = data.clan.name
         }
@@ -191,7 +217,28 @@ let discordReady = () => {
         }
         debug(data.clan.name ? (data.clan.tag + ' ' + data.clan.name) : data.clan.tag)
         debug(data.opponent.name ? (data.opponent.tag + ' ' + data.opponent.name) : data.opponent.tag)
+        debug('Tag: ' + data.clan.tag)
         debug('State: ' + data.state)
+        debug(util.inspect(data, { depth: null, colors: true }))
+        WarData.stats = {
+          clan: {
+            tag: data.clan.tag,
+            name: data.clan.name,
+            stars: data.clan.stars,
+            attacks: data.clan.attacks,
+            destructionPercentage: data.clan.destructionPercentage,
+            memberCount: data.clan.members.length
+          },
+          opponent: {
+            tag: data.opponent.tag,
+            name: data.opponent.name,
+            stars: data.opponent.stars,
+            attacks: data.opponent.attacks,
+            destructionPercentage: data.opponent.destructionPercentage,
+            memberCount: data.opponent.members.length
+          }
+        }
+        storage.setItemSync(warId, WarData)
         let tmpAttacks = {}
         data.clan.members.forEach(member => {
           Players[member.tag] = member
@@ -285,6 +332,21 @@ let discordReady = () => {
     setTimeout(discordReady, 1000 * config.updateInterval)
   })
 }
+
+DiscordClient.on('message', message => {
+  if (message.content.toLowerCase() === '!warstats') {
+    let channelId = message.channel.id
+    getChannelClan(channelId, clanTag => {
+      let warId = WarIds[clanTag]
+      let WarData = storage.getItemSync(warId)
+      if (WarData) {
+        discordStatsMessage(warId, WarStats, channelId)
+      } else {
+        message.channel.sendMessage('War data is missing try again in a little bit. I might still be fetching the data.')
+      }
+    })
+  }
+});
 
 DiscordClient.on('ready', () => {
   DiscordClient.channels.forEach(channel => {
