@@ -71,7 +71,7 @@ const StarColors = config.starColors
 
 let getClanChannel = (clanTag, done) => {
   config.clans.forEach(clan => {
-    if (clan.tag === clanTag) {
+    if (clan.tag.toUpperCase().replace(/O/g, '0') === clanTag) {
       done(clan.channelId)
     }
   })
