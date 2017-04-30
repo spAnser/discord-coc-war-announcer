@@ -388,31 +388,33 @@ DiscordClient.on('ready', () => {
   DiscordClient.channels.forEach(channel => {
     DiscordChannels[channel.id] = channel
     DiscordChannelEmojis[channel.id] = {}
-    debug(channel.guild.emojis)
-    channel.guild.emojis.map(emoji => {
-      DiscordChannelEmojis[channel.id][emoji.name] = '<:' + emoji.name + ':' + emoji.id + '>'
-    })
-    /* Setup Fallback Emojis */
-    if (!DiscordChannelEmojis[channel.id]['dwashield']) {
-      DiscordChannelEmojis[channel.id]['dwashield'] = '<:dwashield:306956561266507786>'
-    }
-    if (!DiscordChannelEmojis[channel.id]['dwashieldbroken']) {
-      DiscordChannelEmojis[channel.id]['dwashieldbroken'] = '<:dwashieldbroken:306956561073438720>'
-    }
-    if (!DiscordChannelEmojis[channel.id]['dwasword']) {
-      DiscordChannelEmojis[channel.id]['dwasword'] = '<:dwasword:306956560695951362>'
-    }
-    if (!DiscordChannelEmojis[channel.id]['dwaswordbroken']) {
-      DiscordChannelEmojis[channel.id]['dwaswordbroken'] = '<:dwaswordbroken:306956561073307648>'
-    }
-    if (!DiscordChannelEmojis[channel.id]['dwastarempty']) {
-      DiscordChannelEmojis[channel.id]['dwastarempty'] = '<:dwastarempty:306956560779706370>'
-    }
-    if (!DiscordChannelEmojis[channel.id]['dwastar']) {
-      DiscordChannelEmojis[channel.id]['dwastar'] = '<:dwastar:306956561056530442>'
-    }
-    if (!DiscordChannelEmojis[channel.id]['dwastarnew']) {
-      DiscordChannelEmojis[channel.id]['dwastarnew'] = '<:dwastarnew:306956560855465995>'
+    if (channel.type === 'text') {
+      debug(channel.guild.emojis)
+      channel.guild.emojis.map(emoji => {
+        DiscordChannelEmojis[channel.id][emoji.name] = '<:' + emoji.name + ':' + emoji.id + '>'
+      })
+      /* Setup Fallback Emojis */
+      if (!DiscordChannelEmojis[channel.id]['dwashield']) {
+        DiscordChannelEmojis[channel.id]['dwashield'] = '<:dwashield:306956561266507786>'
+      }
+      if (!DiscordChannelEmojis[channel.id]['dwashieldbroken']) {
+        DiscordChannelEmojis[channel.id]['dwashieldbroken'] = '<:dwashieldbroken:306956561073438720>'
+      }
+      if (!DiscordChannelEmojis[channel.id]['dwasword']) {
+        DiscordChannelEmojis[channel.id]['dwasword'] = '<:dwasword:306956560695951362>'
+      }
+      if (!DiscordChannelEmojis[channel.id]['dwaswordbroken']) {
+        DiscordChannelEmojis[channel.id]['dwaswordbroken'] = '<:dwaswordbroken:306956561073307648>'
+      }
+      if (!DiscordChannelEmojis[channel.id]['dwastarempty']) {
+        DiscordChannelEmojis[channel.id]['dwastarempty'] = '<:dwastarempty:306956560779706370>'
+      }
+      if (!DiscordChannelEmojis[channel.id]['dwastar']) {
+        DiscordChannelEmojis[channel.id]['dwastar'] = '<:dwastar:306956561056530442>'
+      }
+      if (!DiscordChannelEmojis[channel.id]['dwastarnew']) {
+        DiscordChannelEmojis[channel.id]['dwastarnew'] = '<:dwastarnew:306956560855465995>'
+      }
     }
   })
   discordReady()
