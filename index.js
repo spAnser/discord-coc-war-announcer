@@ -81,7 +81,7 @@ let getClanChannel = (clanTag, done) => {
 let getChannelClan = (channelId, done) => {
   config.clans.forEach(clan => {
     if (clan.channelId === channelId) {
-      done(clan.tag)
+      done(clan.tag.toUpperCase().replace(/O/g, '0'))
     }
   })
   return false
@@ -212,7 +212,7 @@ let discordReady = () => {
 
   async.each(config.clans, (clan, done) => {
     findRemoveSync('.node-persist/storage', { age: { seconds: 60 * 60 * 24 * 9 } }) // Cleanup Files older than a week + 2 days for prep / war day.
-    getCurrentWar(clan.tag, data => {
+    getCurrentWar(clan.tag.toUpperCase().replace(/O/g, '0'), data => {
       if (data && data.reason != 'accessDenied') {
         let sha1 = crypto.createHash('sha1')
         let clanTag = data.clan.tag
@@ -340,7 +340,7 @@ let discordReady = () => {
         })
         done()
       } else if (data && data.reason == 'accessDenied') {
-        log(chalk.red.bold(clan.tag + ' War Log is not public'))
+        log(chalk.red.bold(clan.tag.toUpperCase().replace(/O/g, '0') + ' War Log is not public'))
         done()
       }
       debug(util.inspect(data, { depth: null, colors: true }))
