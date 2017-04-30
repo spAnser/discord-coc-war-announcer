@@ -7,11 +7,13 @@ A node.js discord bot written to monitor the Clash of Clans API and announce war
 # Installation
 
 1. Clone this repository.
+1. Make sure you have [Node.JS](https://nodejs.org/en/) installed.
 1. Run `npm i` to install the node modules.
 1. Duplicate and rename `config.example.js` to `config.js`.
 1. You will need a api key from [Clash of Clans API](https://developer.clashofclans.com/) which should be placed inside `config.js` under `coc->apiKey`.
 1. You will need an app from [Discord My Apps](https://discordapp.com/developers/applications/me). You will need the apps ***Client ID*** and ***Bot Token*** these belong inside `config.js` under `discord->clientId` and `discord->userToken`.
 1. The bot needs you clan tag and a *Channel ID* to post the announcements in. The clan will need a public war log. To get the *Channel ID* follow [this guide](https://support.discordapp.com/hc/en-us/articles/206346498-Where-can-I-find-my-server-ID).
+1. Give the bot permissions on your server using this url `https://discordapp.com/oauth2/authorize?client_id=__CLIENT_ID__&scope=bot&permissions=134208` and replace `__CLIENT_ID__` with your bot's client id
 1. The clan being monitored will need their war log set to public.
 1. Run `node index.js` to start the bot.
 1. If you need the bot to be kept alive look into [PM2](https://github.com/Unitech/pm2)
