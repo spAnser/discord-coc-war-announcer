@@ -14,6 +14,7 @@ A node.js discord bot written to monitor the Clash of Clans API and announce war
 1. The bot needs you clan tag and a *Channel ID* to post the announcements in. The clan will need a public war log. To get the *Channel ID* follow [this guide](https://support.discordapp.com/hc/en-us/articles/206346498-Where-can-I-find-my-server-ID).
 1. The clan being monitored will need their war log set to public.
 1. Run `node index.js` to start the bot.
+1. If you need the bot to be kept alive look into [PM2](https://github.com/Unitech/pm2)
 
 ## Multiple Clan Announcements
 To run multiple announcements for multiple clans simply follow the layout below. It demonstrats 3 clans to announce. Each clan will need an *Channel ID* to post annoucements to

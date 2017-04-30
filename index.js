@@ -28,7 +28,9 @@ const util = require('util')
 const async = require('async')
 const chalk = require('chalk')
 const Discord = require('discord.js')
+const findRemoveSync = require('find-remove')
 const get = require('simple-get')
+const moment = require('moment')
 const storage = require('node-persist')
 
 console.log(chalk.cyan('-'.repeat(17)))
@@ -123,6 +125,7 @@ let discordAttackMessage = (warId, WarData, clanTag, opponentTag, attackData, ch
   }
   const embed = new Discord.RichEmbed()
   .setTitle(Clans[clanTag] + ' vs ' + Clans[opponentTag])
+  .setFooter(WarData.stats.clan.tag + ' vs ' + WarData.stats.opponent.tag)
   .setColor(StarColors[attackData.stars])
   .addField(clanPlayer.name, (attackData.who === 'clan') ? attackMessage : defendMessage, true)
   .addField(DiscordTownHallEmojis[clanPlayer.townhallLevel - 1] + ' ' + clanPlayer.mapPosition + ' vs ' + opponentPlayer.mapPosition + ' ' + DiscordTownHallEmojis[opponentPlayer.townhallLevel - 1], emojis.dwastar.repeat(attackData.stars-attackData.newStars) + emojis.dwastarnew.repeat(attackData.newStars) + emojis.dwastarempty.repeat(3 - attackData.stars) + '\n\t\t' + attackData.destructionPercentage + '%', true)
@@ -137,8 +140,18 @@ let discordStatsMessage = (warId, WarData, channelId) => {
   debug(warId)
   debug(WarData)
   let emojis = DiscordChannelEmojis[channelId]
+  let extraMessage = ''
+  if (WarData.stats.state === 'preparation') {
+    extraMessage = '\nWar starts ' + moment(WarData.stats.startTime).fromNow()
+  } else if (WarData.stats.state === 'inWar') {
+    extraMessage = '\nWar ends ' + moment(WarData.stats.endTime).fromNow()
+  } else if (WarData.stats.state === 'warEnded') {
+    extraMessage = '\nWar ended ' + moment(WarData.stats.endTime).fromNow()
+  }
   const embed = new Discord.RichEmbed()
   .setTitle(WarData.stats.clan.name + ' vs ' + WarData.stats.opponent.name)
+  .setDescription(extraMessage)
+  .setFooter(WarData.stats.clan.tag + ' vs ' + WarData.stats.opponent.tag)
   .setColor(0x007cff)
   .addField(WarData.stats.clan.attacks + '/' + WarData.stats.clan.memberCount * 2 + ' ' + emojis.dwasword, WarData.stats.clan.destructionPercentage + '%', true)
   .addField(WarData.stats.clan.memberCount + ' v ' + WarData.stats.opponent.memberCount, WarData.stats.clan.stars + ' ' + emojis.dwastarnew + ' vs ' + emojis.dwastarnew + ' ' + WarData.stats.opponent.stars, true)
@@ -198,6 +211,7 @@ let discordReady = () => {
   }
 
   async.each(config.clans, (clan, done) => {
+    findRemoveSync('.node-persist/storage', { age: { seconds: 60 * 60 * 24 * 9 } }) // Cleanup Files older than a week + 2 days for prep / war day.
     getCurrentWar(clan.tag, data => {
       if (data && data.reason != 'accessDenied') {
         let sha1 = crypto.createHash('sha1')
@@ -221,6 +235,9 @@ let discordReady = () => {
         debug('State: ' + data.state)
         debug(util.inspect(data, { depth: null, colors: true }))
         WarData.stats = {
+          state: data.state,
+          endTime: data.endTime,
+          startTime: data.startTime,
           clan: {
             tag: data.clan.tag,
             name: data.clan.name,
@@ -334,17 +351,36 @@ let discordReady = () => {
 }
 
 DiscordClient.on('message', message => {
-  if (message.content.toLowerCase() === '!warstats') {
-    let channelId = message.channel.id
-    getChannelClan(channelId, clanTag => {
-      let warId = WarIds[clanTag]
-      let WarData = storage.getItemSync(warId)
-      if (WarData) {
-        discordStatsMessage(warId, WarStats, channelId)
+  let messageContent = message.content.trim()
+  if (messageContent.slice(0, 1) === '!') {
+    let splitMessage = messageContent.split(' ')
+    if (splitMessage[0].toLowerCase() === '!warstats') {
+      let channelId = message.channel.id
+      if (splitMessage[1]) {
+        if (Clans[splitMessage[1]]) {
+          let clanTag = splitMessage[1]
+          let warId = WarIds[clanTag]
+          let WarData = storage.getItemSync(warId)
+          if (WarData) {
+            discordStatsMessage(warId, WarData, channelId)
+          } else {
+            message.channel.sendMessage('War data is missing try again in a little bit. I might still be fetching the data.')
+          }
+        } else {
+          message.channel.sendMessage('I don\'t appear to have any war data for that clan.')
+        }
       } else {
-        message.channel.sendMessage('War data is missing try again in a little bit. I might still be fetching the data.')
+        getChannelClan(channelId, clanTag => {
+          let warId = WarIds[clanTag]
+          let WarData = storage.getItemSync(warId)
+          if (WarData) {
+            discordStatsMessage(warId, WarData, channelId)
+          } else {
+            message.channel.sendMessage('War data is missing try again in a little bit. I might still be fetching the data.')
+          }
+        })
       }
-    })
+    }
   }
 });
 
