@@ -16,6 +16,36 @@ A node.js discord bot written to monitor the Clash of Clans API and announce war
 1. Run `node index.js` to start the bot.
 1. If you need the bot to be kept alive look into [PM2](https://github.com/Unitech/pm2)
 
+## FAQ
+
+1. ***Q:*** *Why do the icons not show up on android?*  
+***A:*** There is currently a [bug](https://feedback.discordapp.com/forums/326712-discord-dream-land/suggestions/18524065-fix-emojis-inside-embeds-on-android) with the android version of the app that prevents emojis in RichEmbeds from appearing
+1. ***Q:*** *I saw an attack in game but the bot hasn't said anything in chat about it yet.*  
+***A:*** Currently the Clash of Clans API only updates every 10 minutes. So it can take anywhere from immediately to 10 minutes for an attack to show up in chat.
+1. ***Q:*** *How many clans can the **Announcer** monitor?*  
+***A:*** The bot should be able handle as many clans as you configure it for.
+1. ***Q:*** *What does 🍃 mean?*  
+***A:*** A leaf icons stands for a fresh attack. An attack on a base not yet attacked in this war.
+1. ***Q:*** *What does 🔺 and 🔻 mean?*  
+***A:*** When a Town Hall 9 attacks a Town Hall 10 it displays a 🔺. When a Town Hall 10 attacks a Town Hall 9 it displays a 🔻.
+1. ***Q:*** *Can I get info about the current/upcoming war from the bot?*  
+***A:*** Yes just type `!warstats` into chat. If you have multiple clan's attacks showing up in a single channel you can use `!warstats #CLANTAG` to get stats for a specific clan.
+1. ***Q:*** *Can I customize the emojis the bot uses?*  
+***A:*** Yes you can by uploading you own emojis and using the names below
+    Name | Meaning
+    - | -
+    dwasword | Attack Success
+    dwaswordbroken | Attack Failed
+    dwashield | Defend Success
+    dwashieldbroken | Defend Failed
+    dwastar | Star
+    dwastarnew | New Star
+    dwastarempty | Empty Star
+1. ***Q:*** *Can I use this bot to call bases?*  
+***A:*** No not at this time.
+1. ***Q:*** *Will this bot keep detailed statistics of our wars?*  
+***A:*** No not at this time.
+
 ## Multiple Clan Announcements
 To run multiple announcements for multiple clans simply follow the layout below. It demonstrats 3 clans to announce. Each clan will need an *Channel ID* to post annoucements to
 ```javascript
@@ -34,20 +64,3 @@ To run multiple announcements for multiple clans simply follow the layout below.
     }
   ],
 ```
-
-## FAQ
-
-1. ***Q:*** *Why do the icons not show up on android?*  
-***A:*** There is currently a [bug](https://feedback.discordapp.com/forums/326712-discord-dream-land/suggestions/18524065-fix-emojis-inside-embeds-on-android) with the android version of the app that prevents emojis in RichEmbeds from appearing
-1. ***Q:*** *I saw an attack in game but the bot hasn't said anything in chat about it yet.*  
-***A:*** Currently the Clash of Clans API only updates every 10 minutes. So it can take anywhere from immediately to 10 minutes for an attack to show up in chat.
-1. ***Q:*** *How many clans can the **Announcer** monitor?*  
-***A:*** The bot should be able handle as many clans as you configure it for.
-1. ***Q:*** *What does 🍃 mean?*  
-***A:*** A leaf icons stands for a fresh attack. An attack on a base not yet attacked in this war.
-1. ***Q:*** *What does 🔺 and 🔻 mean?*  
-***A:*** When a Town Hall 9 attacks a Town Hall 10 it displays a 🔺. When a Town Hall 10 attacks a Town Hall 9 it displays a 🔻.
-1. ***Q:*** *Can I use this bot to call bases?*  
-***A:*** No not at this time.
-1. ***Q:*** *Will this bot keep detailed statistics of our wars?*  
-***A:*** No not at this time.
