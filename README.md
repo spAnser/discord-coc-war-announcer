@@ -34,15 +34,16 @@ A node.js discord bot written to monitor the Clash of Clans API and announce war
 ***A:*** Yes just type `!warstats` into chat. If you have multiple clan's attacks showing up in a single channel you can use `!warstats #CLANTAG` to get stats for a specific clan.
 1. ***Q:*** *Can I customize the emojis the bot uses?*  
 ***A:*** Yes you can by uploading you own emojis and using the names below
-    Name | Meaning
-    - | -
-    dwasword | Attack Success
-    dwaswordbroken | Attack Failed
-    dwashield | Defend Success
-    dwashieldbroken | Defend Failed
-    dwastar | Star
-    dwastarnew | New Star
-    dwastarempty | Empty Star
+
+    |Name | Meaning|
+    |-|-|
+    |dwasword | Attack Success|
+    |dwaswordbroken | Attack Failed|
+    |dwashield | Defend Success|
+    |dwashieldbroken | Defend Failed|
+    |dwastar | Star|
+    |dwastarnew | New Star|
+    |dwastarempty | Empty Star|
 1. ***Q:*** *Can I use this bot to call bases?*  
 ***A:*** No not at this time.
 1. ***Q:*** *Will this bot keep detailed statistics of our wars?*  
