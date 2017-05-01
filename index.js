@@ -213,7 +213,7 @@ let discordReady = () => {
   async.each(config.clans, (clan, done) => {
     findRemoveSync('.node-persist/storage', { age: { seconds: 60 * 60 * 24 * 9 } }) // Cleanup Files older than a week + 2 days for prep / war day.
     getCurrentWar(clan.tag.toUpperCase().replace(/O/g, '0'), data => {
-      if (data && data.reason != 'accessDenied') {
+      if (data && data.reason != 'accessDenied' && data.state != 'notInWar') {
         let sha1 = crypto.createHash('sha1')
         let clanTag = data.clan.tag
         let opponentTag = data.opponent.tag
@@ -382,7 +382,7 @@ DiscordClient.on('message', message => {
       }
     }
   }
-});
+})
 
 DiscordClient.on('ready', () => {
   DiscordClient.channels.forEach(channel => {
