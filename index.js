@@ -133,7 +133,7 @@ let discordAttackMessage = (warId, WarData, clanTag, opponentTag, attackData, ch
 
   WarData.lastReportedAttack = attackData.order
   storage.setItemSync(warId, WarData)
-  DiscordChannels[channelId].sendEmbed(embed)
+  DiscordChannels[channelId].send({embed})
 }
 
 let discordStatsMessage = (warId, WarData, channelId) => {
@@ -157,7 +157,7 @@ let discordStatsMessage = (warId, WarData, channelId) => {
   .addField(WarData.stats.clan.memberCount + ' v ' + WarData.stats.opponent.memberCount, WarData.stats.clan.stars + ' ' + emojis.dwastarnew + ' vs ' + emojis.dwastarnew + ' ' + WarData.stats.opponent.stars, true)
   .addField(WarData.stats.opponent.attacks + '/' + WarData.stats.opponent.memberCount * 2 + ' ' + emojis.dwasword, WarData.stats.opponent.destructionPercentage + '%', true)
 
-  DiscordChannels[channelId].sendEmbed(embed)
+  DiscordChannels[channelId].send({embed});
 }
 
 let discordReportMessage = (warId, WarData, clanTag, opponentTag, message, channelId) => {
@@ -171,7 +171,7 @@ let discordReportMessage = (warId, WarData, clanTag, opponentTag, message, chann
   .addField(message.title, message.body)
 
   storage.setItemSync(warId, WarData)
-  DiscordChannels[channelId].sendEmbed(embed)
+  DiscordChannels[channelId].send({embed})
 }
 
 let discordReady = () => {
