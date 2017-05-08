@@ -463,7 +463,7 @@ DiscordClient.on('message', message => {
 
       message.channel.send({embed})
     } else if (splitMessage[0].toLowerCase() === '!help') {
-      message.channel.send('1. `!announce #CLANTAG` Assign a clan to announce a channel.\n2. `!unannounce #CLANTAG` Un-Assign a clan to announce a channel.\n3. `!warstats #CLANTAG` Display war stats for a clan that is tracked by The Announcer. If not provided with a clan tag it will display war stats for all clans assigned to the channel the command was run in.\n4. `!hitrate #CLANTAG` Display hit rate stats for a clan that is tracked by The Announcer. If not provided with a clan tag it will display hit rate stats for all clans assigned to the channel the command was run in.\n5. `!playerstats #PLAYERTAG` Display player stats for any player tag provided.\n6. `!info` Display bot information.')
+      message.channel.send('1. `!announce #CLANTAG` Assign a clan to announce in a channel.\n2. `!unannounce #CLANTAG` Stop a clan from announcing in a channel.\n3. `!warstats #CLANTAG` Display war stats for a clan that is tracked by The Announcer. If not provided with a clan tag it will display war stats for all clans assigned to the channel the command was run in.\n4. `!hitrate #CLANTAG` Display hit rate stats for a clan that is tracked by The Announcer. If not provided with a clan tag it will display hit rate stats for all clans assigned to the channel the command was run in.\n5. `!playerstats #PLAYERTAG` Display player stats for any player tag provided.\n6. `!info` Display bot information.')
     } else if (splitMessage[0].toLowerCase() === '!announce') {
       if (message.member.hasPermission('MANAGE_CHANNELS')) {
         if (splitMessage[1]) {

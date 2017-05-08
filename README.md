@@ -10,8 +10,8 @@ A node.js discord bot written to monitor the Clash of Clans API and announce war
 
 # Commands
 
-1. `!announce #CLANTAG` Assign a clan to announce a channel.
-1. `!unannounce #CLANTAG` Un-Assign a clan to announce a channel.
+1. `!announce #CLANTAG` Assign a clan to announce in a channel.
+1. `!unannounce #CLANTAG` Stop a clan from announcing in a channel.
 1. `!warstats #CLANTAG` Display war stats for a clan that is tracked by The Announcer. If not provided with a clan tag it will display war stats for all clans assigned to the channel the command was run in.
 1. `!hitrate #CLANTAG` Display hit rate stats for a clan that is tracked by The Announcer. If not provided with a clan tag it will display hit rate stats for all clans assigned to the channel the command was run in.
 1. `!playerstats #PLAYERTAG` Display player stats for any player tag provided.
