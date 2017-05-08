@@ -1,13 +1,28 @@
 # Discord Clash of Clans War Details
 
-A node.js discord bot written to monitor the Clash of Clans API and announce war attacks to a discord channel. It will also announce when prep day has started and when war day begins. There is also a reminder message 1 hour before war ends. Also by default there is a final message that pings `@everyone` 15 minutes, by default, before war ends to get their war attacks in if they haven't. All messages are configrable withom the config file as well as the final minutes timer that pings `@everyone`.
-
-![Screenshot](/screenshot.png)
+A node.js discord bot written to monitor the Clash of Clans API and announce war attacks to a discord channel. It will also announce when prep day has started and when war day begins. There is also a reminder message 1 hour before war ends. There is a final message that announces 15 minutes, by default, before war ends.
 
 # Installation
 
+1. [Authorize Announcer](https://discordapp.com/oauth2/authorize?client_id=307275616179322881&scope=bot&permissions=134208) on your server.
+1. Have someone that has `Manage Channel` permissions for the server assign a clan with the command `!announce #CLANTAG` in the channel you want messages in.
+1. To stop messages in a channel use the command `!unannounce #CLANTAG` requires the same permission as the `!announce` command.
+
+# Commands
+
+1. `!announce #CLANTAG` Assign a clan to announce a channel.
+1. `!unannounce #CLANTAG` Un-Assign a clan to announce a channel.
+1. `!warstats #CLANTAG` Display war stats for a clan that is tracked by The Announcer. If not provided with a clan tag it will display war stats for all clans assigned to the channel the command was run in.
+1. `!hitrate #CLANTAG` Display hit rate stats for a clan that is tracked by The Announcer. If not provided with a clan tag it will display hit rate stats for all clans assigned to the channel the command was run in.
+1. `!playerstats #PLAYERTAG` Display player stats for any player tag provided.
+1. `!info` Display bot information.
+
+![Screenshot](/screenshot.png)
+
+# Self Hosted Installation
+
 1. Clone this repository.
-1. Make sure you have [Node.JS](https://nodejs.org/en/) installed.
+1. Make sure you have [Node.JS](https://nodejs.org/en/) 6.10.x or newer installed.
 1. Run `npm i` to install the node modules.
 1. Duplicate and rename `config.example.js` to `config.js`.
 1. You will need a api key from [Clash of Clans API](https://developer.clashofclans.com/) which should be placed inside `config.js` under `coc->apiKey`.

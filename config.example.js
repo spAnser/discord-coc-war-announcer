@@ -1,12 +1,7 @@
 module.exports = {
+  owner: '', // Put your discord tag here
   asyncLimit: 5,
   updateInterval: 60 * 2, // 2 Minutes
-  clans: [
-    {
-      tag: '',
-      channelId: ''
-    }
-  ],
   coc: {
     apiKey: '',
   },
@@ -39,7 +34,7 @@ module.exports = {
     },
     finalMinutes: {
       title: 'The final minutes are here!',
-      body: '@everyone If you haven\'t made both of your attacks you better get on it.',
+      body: 'If you haven\'t made both of your attacks you better get on it.',
       color: 0x007cff
     }
   }

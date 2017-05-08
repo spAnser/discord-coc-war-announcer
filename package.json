@@ -1,6 +1,6 @@
 {
   "name": "discord-coc-war-announcer",
-  "version": "1.0.1",
+  "version": "2.0.0",
   "description": "A node.js discord bot written to monitor the Clash of Clans API and announce war attacks to a discord channel.",
   "main": "index.js",
   "repository": {
@@ -15,8 +15,9 @@
   "homepage": "https://github.com/spAnser/discord-coc-war-announcer",
   "dependencies": {
     "async": "^2.3.0",
+    "bufferutil": "^3.0.0",
     "chalk": "^1.1.3",
-    "discord.js": "^11.0.0",
+    "discord.js": "^11.1.0",
     "erlpack": "github:hammerandchisel/erlpack",
     "find-remove": "^1.0.1",
     "moment": "^2.18.1",
