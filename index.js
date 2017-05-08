@@ -11,6 +11,16 @@ if (!String.prototype.splice) {
   }
 }
 
+let cleanArray = actual => {
+  let newArray = []
+  for (let i = 0; i < actual.length; i++) {
+    if (actual[i]) {
+      newArray.push(actual[i])
+    }
+  }
+  return newArray
+}
+
 global.fixISO = str => {
   return str.splice(13, 0, ':').splice(11, 0, ':').splice(6, 0, '-').splice(4, 0, '-')
 }
@@ -107,6 +117,8 @@ global.Storage = nodePersist.create()
 Storage.initSync()
 
 global.AnnounceClans = Storage.getItemSync('AnnounceClans')
+AnnounceClans = cleanArray(AnnounceClans)
+Storage.setItemSync('AnnounceClans', AnnounceClans)
 if (!AnnounceClans) AnnounceClans = []
 
 const StarColors = config.starColors
@@ -450,6 +462,8 @@ DiscordClient.on('message', message => {
       .addField('Clash of Clans War Announcer', 'This is an insance of [Discord CoC War Announcer](https://github.com/spAnser/discord-coc-war-announcer). A node.js discord bot written to monitor the Clash of Clans API and announce war attacks to a discord channel.')
 
       message.channel.send({embed})
+    } else if (splitMessage[0].toLowerCase() === '!help') {
+      message.channel.send('1. `!announce #CLANTAG` Assign a clan to announce a channel.\n2. `!unannounce #CLANTAG` Un-Assign a clan to announce a channel.\n3. `!warstats #CLANTAG` Display war stats for a clan that is tracked by The Announcer. If not provided with a clan tag it will display war stats for all clans assigned to the channel the command was run in.\n4. `!hitrate #CLANTAG` Display hit rate stats for a clan that is tracked by The Announcer. If not provided with a clan tag it will display hit rate stats for all clans assigned to the channel the command was run in.\n5. `!playerstats #PLAYERTAG` Display player stats for any player tag provided.\n6. `!info` Display bot information.')
     } else if (splitMessage[0].toLowerCase() === '!announce') {
       if (message.member.hasPermission('MANAGE_CHANNELS')) {
         if (splitMessage[1]) {
@@ -479,6 +493,7 @@ DiscordClient.on('message', message => {
               message.channel.send('War announcements for ' + clanTag + ' registered in this channel.')
             }
           }
+          AnnounceClans = cleanArray(AnnounceClans)
           Storage.setItemSync('AnnounceClans', AnnounceClans)
         } else {
           message.channel.send('Please provide a clan tag to start announcements for.\n```\n!announce #clanTag\n```')
@@ -519,6 +534,7 @@ DiscordClient.on('message', message => {
               Clans[clanTag].removeChannel(channelId)
             }
           }
+          AnnounceClans = cleanArray(AnnounceClans)
           Storage.setItemSync('AnnounceClans', AnnounceClans)
         } else {
           message.channel.send('Please provide a clan tag to stop announcements for.\n```\n!unannounce #clanTag\n```')
