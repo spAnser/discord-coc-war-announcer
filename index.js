@@ -10,15 +10,16 @@ if (!String.prototype.splice) {
     return this.slice(0, start) + newSubStr + this.slice(start + Math.abs(delCount))
   }
 }
-let fixISO = str => {
+
+global.fixISO = str => {
   return str.splice(13, 0, ':').splice(11, 0, ':').splice(6, 0, '-').splice(4, 0, '-')
 }
 
-let log = message => {
+global.log = message => {
   if (LOG) console.log((message) ? message : '')
 }
 
-let debug = message => {
+global.debug = message => {
   if (DEBUG) console.log(chalk.yellow('DEBUG:'), message)
 }
 
@@ -31,13 +32,14 @@ const Discord = require('discord.js')
 const findRemoveSync = require('find-remove')
 const get = require('simple-get')
 const moment = require('moment')
-const storage = require('node-persist')
+const nodePersist = require('node-persist')
+const Clan = require('./clash-of-clans-api/clans')
 
 console.log(chalk.cyan('-'.repeat(17)))
 console.log(chalk.cyan(' Discord War Bot '))
 console.log(chalk.cyan('-'.repeat(17)))
 
-const config = require('./config')
+global.config = require('./config')
 log(chalk.bold('Server Permission URL:'))
 log(chalk.magenta.bold('https://discordapp.com/oauth2/authorize?client_id=' + config.discord.clientId + '&scope=bot&permissions=134208\n'))
 
@@ -45,9 +47,8 @@ const DiscordClient = new Discord.Client()
 
 const COC_API_BASE = 'https://api.clashofclans.com/v1'
 
-let DiscordChannels = {}
-let DiscordChannelEmojis = {}
-let DiscordTownHallEmojis = [
+global.DiscordChannelEmojis = {}
+global.DiscordTownHallEmojis = [
   '<:townhall1:307293097405054976>',
   '<:townhall2:307293097748987904>',
   '<:townhall3:307293098260824085>',
@@ -60,34 +61,108 @@ let DiscordTownHallEmojis = [
   '<:townhall10:307293099808260096>',
   '<:townhall11:307293099174920192>',
 ]
+global.DiscordTroopEmojis = {
+  'Barbarian': '<:barbarian:310230295901372418>',
+  'Archer': '<:archer:310230294085107734>',
+  'Goblin': '<:goblin:310230297180504064>',
+  'Giant': '<:giant:310230296488443915>',
+  'Wall Breaker': '<:wallbreaker:310230296740102144>',
+  'Balloon': '<:ballooncoc:310230296580718603>',
+  'Wizard': '<:wizard:310230297834815488>',
+  'Healer': '<:healer:310230296572461057>',
+  'Dragon': '<:dragoncoc:310230297570705408>',
+  'P.E.K.K.A': '<:pekka:310230296689639434>',
+  'Minion': '<:minion:310230296584912896>',
+  'Hog Rider': '<:hogrider:310230295896915969>',
+  'Valkyrie': '<:valkyrie:310230296379260929>',
+  'Golem': '<:golem:310230296761204736>',
+  'Witch': '<:witch:310230296568135680>',
+  'Lava Hound': '<:lavahound:310230296765267968>',
+  'Bowler': '<:bowler:310230295905566722>',
+  'Baby Dragon': '<:babydragon:310230294475309057>',
+  'Miner': '<:miner:310230297167921153>',
+}
+global.DiscordSpellEmojis = {
+  'Lightning Spell': '<:lightningspell:310230391489429506>',
+  'Healing Spell': '<:healingspell:310230391497687042>',
+  'Rage Spell': '<:ragespell:310230391187308545>',
+  'Jump Spell': '<:jumpspell:310230391002759179>',
+  'Freeze Spell': '<:freezespell:310230391569252352>',
+  'Poison Spell': '<:poisonspell:310230391074193411>',
+  'Earthquake Spell': '<:earthquakespell:310230390059040769>',
+  'Haste Spell': '<:hastespell:310230391317331968>',
+  'Clone Spell': '<:clonespell:310230390407430144>',
+  'Skeleton Spell': '<:skeletonspell:310230391262937094>',
+}
+global.DiscordHeroEmojis = {
+  'Barbarian King': '<:barbarianking:310230422481141760>',
+  'Archer Queen': '<:archerqueen:310230422455975936>',
+  'Grand Warden': '<:grandwarden:310230422560964608>',
+}
 
-let Clans = {}
-let WarIds = {}
-let Players = {}
+global.Clans = {}
+global.Players = {}
 
-storage.initSync()
+global.Storage = nodePersist.create()
+Storage.initSync()
+
+global.AnnounceClans = Storage.getItemSync('AnnounceClans')
+if (!AnnounceClans) AnnounceClans = []
 
 const StarColors = config.starColors
 
-let getClanChannel = (clanTag, done) => {
-  config.clans.forEach(clan => {
-    if (clan.tag.toUpperCase().replace(/O/g, '0') === clanTag) {
-      done(clan.channelId)
+global.announcingClan = (clanTag) => {
+  let count = 0
+  let match
+  AnnounceClans.forEach(clan => {
+    if (clan.tag === clanTag.toUpperCase().replace(/O/g, '0')) {
+      match = count
     }
+    count++
   })
-  return false
+  return match
 }
 
-let getChannelClan = (channelId, done) => {
-  config.clans.forEach(clan => {
-    if (clan.channelId === channelId) {
-      done(clan.tag.toUpperCase().replace(/O/g, '0'))
+global.getClanChannel = (clanTag, done) => {
+  AnnounceClans.forEach(clan => {
+    if (clan.tag === clanTag.toUpperCase().replace(/O/g, '0')) {
+      done(clan.channels)
     }
   })
-  return false
 }
 
-let discordAttackMessage = (warId, WarData, clanTag, opponentTag, attackData, channelId) => {
+global.getChannelClan = (channelId, done) => {
+  AnnounceClans.forEach(clan => {
+    if (clan.channels.indexOf(channelId) > -1) {
+      done(clan.tag)
+    }
+  })
+}
+
+global.getChannelById = (channelId, done) => {
+  DiscordClient.channels.forEach(channel => {
+    if (channel.id == channelId) done(channel)
+  })
+  done()
+}
+
+global.getAnnouncerStats = () => {
+  let announcerStats = {
+    clanCount: AnnounceClans.length
+  }
+  let channels = []
+  AnnounceClans.forEach(announceClan => {
+    announceClan.channels.forEach(channel => {
+      if (channels.indexOf(channel) === -1) {
+        channels.push(channel)
+      }
+    })
+  })
+  announcerStats.channelCount = channels.length
+  return announcerStats
+}
+
+global.discordAttackMessage = (warId, WarData, clanTag, opponentTag, attackData, channelId) => {
   debug(clanTag)
   debug(attackData)
   let emojis = DiscordChannelEmojis[channelId]
@@ -123,21 +198,72 @@ let discordAttackMessage = (warId, WarData, clanTag, opponentTag, attackData, ch
   } else if (attackDir === 'down') {
     attackMessage += '\uD83D\uDD3B' // 🔻
   }
+  attackMessage += '\n' + attackData.attackerTag
+  defendMessage += '\n' + attackData.defenderTag
   const embed = new Discord.RichEmbed()
-  .setTitle(Clans[clanTag] + ' vs ' + Clans[opponentTag])
   .setFooter(WarData.stats.clan.tag + ' vs ' + WarData.stats.opponent.tag)
   .setColor(StarColors[attackData.stars])
   .addField(clanPlayer.name, (attackData.who === 'clan') ? attackMessage : defendMessage, true)
   .addField(DiscordTownHallEmojis[clanPlayer.townhallLevel - 1] + ' ' + clanPlayer.mapPosition + ' vs ' + opponentPlayer.mapPosition + ' ' + DiscordTownHallEmojis[opponentPlayer.townhallLevel - 1], emojis.dwastar.repeat(attackData.stars-attackData.newStars) + emojis.dwastarnew.repeat(attackData.newStars) + emojis.dwastarempty.repeat(3 - attackData.stars) + '\n\t\t' + attackData.destructionPercentage + '%', true)
   .addField(opponentPlayer.name, (attackData.who === 'clan') ? defendMessage : attackMessage, true)
+  .addField(WarData.stats.clan.name + ' vs ' + WarData.stats.opponent.name, '\u200b')
 
   WarData.lastReportedAttack = attackData.order
-  storage.setItemSync(warId, WarData)
-  DiscordChannels[channelId].sendEmbed(embed)
+  ClanStorage.setItemSync(warId, WarData)
+  getChannelById(channelId, discordChannel => {
+    if (discordChannel) discordChannel.send({embed})
+  })
 }
 
-let discordStatsMessage = (warId, WarData, channelId) => {
-  debug(warId)
+global.discordHitrateMessage = (WarData, channelId) => {
+  debug(WarData)
+  if (WarData.stats.state === 'inWar' || WarData.stats.state === 'warEnded') {
+    let emojis = DiscordChannelEmojis[channelId]
+    const embed = new Discord.RichEmbed()
+    .setTitle('Attack Hitrate')
+    .setFooter(WarData.stats.clan.tag + ' vs ' + WarData.stats.opponent.tag)
+    .setColor(0x007cff)
+    
+    if (WarData.stats.hitrate.TH9v9.clan.attempt > 0 || WarData.stats.hitrate.TH9v9.opponent.attempt > 0) {
+      let clan9v9 = 'n/a'
+      if (WarData.stats.hitrate.TH9v9.clan.attempt > 0) clan9v9 = WarData.stats.hitrate.TH9v9.clan.success + '/' + WarData.stats.hitrate.TH9v9.clan.attempt + ' - ' + Math.round(WarData.stats.hitrate.TH9v9.clan.success / WarData.stats.hitrate.TH9v9.clan.attempt * 100, 2) + '%'
+      let opponent9v9 = 'n/a'
+      if (WarData.stats.hitrate.TH9v9.opponent.attempt > 0) opponent9v9 = WarData.stats.hitrate.TH9v9.opponent.success + '/' + WarData.stats.hitrate.TH9v9.opponent.attempt + ' - ' + Math.round(WarData.stats.hitrate.TH9v9.opponent.success / WarData.stats.hitrate.TH9v9.opponent.attempt * 100, 2) + '%'
+      embed.addField(DiscordTownHallEmojis[8] + ' vs ' + DiscordTownHallEmojis[8], clan9v9, true)
+      embed.addField(DiscordTownHallEmojis[8] + ' vs ' + DiscordTownHallEmojis[8], opponent9v9, true)
+      embed.addBlankField(true)
+    }
+    if (WarData.stats.hitrate.TH10v10.clan.attempt > 0 || WarData.stats.hitrate.TH10v10.opponent.attempt > 0) {
+      let clan10v10 = 'n/a'
+      if (WarData.stats.hitrate.TH10v10.clan.attempt > 0) clan10v10 = WarData.stats.hitrate.TH10v10.clan.success + '/' + WarData.stats.hitrate.TH10v10.clan.attempt + ' - ' + Math.round(WarData.stats.hitrate.TH10v10.clan.success / WarData.stats.hitrate.TH10v10.clan.attempt * 100, 2) + '%'
+      let opponent10v10 = 'n/a'
+      if (WarData.stats.hitrate.TH10v10.opponent.attempt > 0) opponent10v10 = WarData.stats.hitrate.TH10v10.opponent.success + '/' + WarData.stats.hitrate.TH10v10.opponent.attempt + ' - ' + Math.round(WarData.stats.hitrate.TH10v10.opponent.success / WarData.stats.hitrate.TH10v10.opponent.attempt * 100, 2) + '%'
+      embed.addField(DiscordTownHallEmojis[9] + ' vs ' + DiscordTownHallEmojis[9], clan10v10, true)
+      embed.addField(DiscordTownHallEmojis[9] + ' vs ' + DiscordTownHallEmojis[9], opponent10v10, true)
+      embed.addBlankField(true)
+    }
+    if (WarData.stats.hitrate.TH10v11.clan.attempt > 0 || WarData.stats.hitrate.TH10v11.opponent.attempt > 0) {
+      let clan10v11 = 'n/a'
+      if (WarData.stats.hitrate.TH10v11.clan.attempt > 0) clan10v11 = WarData.stats.hitrate.TH10v11.clan.success + '/' + WarData.stats.hitrate.TH10v11.clan.attempt + ' - ' + Math.round(WarData.stats.hitrate.TH10v11.clan.success / WarData.stats.hitrate.TH10v11.clan.attempt * 100, 2) + '%'
+      let opponent10v11 = 'n/a'
+      if (WarData.stats.hitrate.TH10v11.opponent.attempt > 0) opponent10v11 = WarData.stats.hitrate.TH10v11.opponent.success + '/' + WarData.stats.hitrate.TH10v11.opponent.attempt + ' - ' + Math.round(WarData.stats.hitrate.TH10v11.opponent.success / WarData.stats.hitrate.TH10v11.opponent.attempt * 100, 2) + '%'
+      embed.addField(DiscordTownHallEmojis[9] + ' vs ' + DiscordTownHallEmojis[10], clan10v11, true)
+      embed.addField(DiscordTownHallEmojis[9] + ' vs ' + DiscordTownHallEmojis[10], opponent10v11, true)
+      embed.addBlankField(true)
+    }
+    embed.addField(WarData.stats.clan.name + ' vs ' + WarData.stats.opponent.name, '\u200b')
+
+    getChannelById(channelId, discordChannel => {
+      if (discordChannel) discordChannel.send({embed}).then(debug).catch(log)
+    })
+  } else {
+    getChannelById(channelId, discordChannel => {
+      if (discordChannel) discordChannel.send('No hitrate stats for this war check back later.')
+    })
+  }
+}
+
+global.discordStatsMessage = (WarData, channelId) => {
   debug(WarData)
   let emojis = DiscordChannelEmojis[channelId]
   let extraMessage = ''
@@ -149,29 +275,96 @@ let discordStatsMessage = (warId, WarData, channelId) => {
     extraMessage = '\nWar ended ' + moment(WarData.stats.endTime).fromNow()
   }
   const embed = new Discord.RichEmbed()
-  .setTitle(WarData.stats.clan.name + ' vs ' + WarData.stats.opponent.name)
-  .setDescription(extraMessage)
   .setFooter(WarData.stats.clan.tag + ' vs ' + WarData.stats.opponent.tag)
   .setColor(0x007cff)
   .addField(WarData.stats.clan.attacks + '/' + WarData.stats.clan.memberCount * 2 + ' ' + emojis.dwasword, WarData.stats.clan.destructionPercentage + '%', true)
   .addField(WarData.stats.clan.memberCount + ' v ' + WarData.stats.opponent.memberCount, WarData.stats.clan.stars + ' ' + emojis.dwastarnew + ' vs ' + emojis.dwastarnew + ' ' + WarData.stats.opponent.stars, true)
   .addField(WarData.stats.opponent.attacks + '/' + WarData.stats.opponent.memberCount * 2 + ' ' + emojis.dwasword, WarData.stats.opponent.destructionPercentage + '%', true)
+  .addField(WarData.stats.clan.name + ' vs ' + WarData.stats.opponent.name, extraMessage)
 
-  DiscordChannels[channelId].sendEmbed(embed)
+  getChannelById(channelId, discordChannel => {
+    if (discordChannel) discordChannel.send({embed}).then(debug).catch(log)
+  })
 }
 
-let discordReportMessage = (warId, WarData, clanTag, opponentTag, message, channelId) => {
+global.discordReportMessage = (warId, WarData, clanTag, message, channelId) => {
   debug(clanTag)
   let emojis = DiscordChannelEmojis[channelId]
   let clanPlayer
   let opponentPlayer
+  // console.log(WarData)
+  // console.log(Clans[clanTag])
   const embed = new Discord.RichEmbed()
-  .setTitle(Clans[clanTag] + ' vs ' + Clans[opponentTag])
+  .setTitle(Clans[clanTag].name + ' vs ' + Clans[clanTag].opponent.name)
   .setColor(message.color)
   .addField(message.title, message.body)
 
-  storage.setItemSync(warId, WarData)
-  DiscordChannels[channelId].sendEmbed(embed)
+  ClanStorage.setItemSync(warId, WarData)
+  getChannelById(channelId, discordChannel => {
+    if (discordChannel) discordChannel.send({embed})
+  })
+}
+
+let playerReport = (channel, data) => {
+  // log(data)
+
+  let embed = new Discord.RichEmbed()
+  .setTitle(data.name + ' ' + data.tag)
+  .setDescription(data.clan.name + '\n' + data.clan.tag)
+  .setThumbnail('https://coc.guide/static/imgs/other/town-hall-' + data.townHallLevel + '.png')
+  
+  let troopLevels = ''
+  let count = 0
+  data.troops.forEach(troop => {
+    troopLevels += DiscordTroopEmojis[troop.name] + ' ' + troop.level
+    if (count > 0 && count % 7 === 0) {
+      troopLevels += '\n'
+    } else {
+      if (troop.level === troop.maxLevel) {
+        troopLevels +=  '*\u2002'
+      } else {
+        troopLevels +=  '\u2002\u2002'
+      }
+    }
+    count++
+  })
+  embed.addField('Troop Levels', troopLevels.slice(0, troopLevels.length - 2))
+
+  let spellLevels = ''
+  count = 0
+  data.spells.forEach(spell => {
+    spellLevels += DiscordSpellEmojis[spell.name] + ' ' + spell.level
+    if (count > 0 && count % 7 === 0) {
+      spellLevels += '\n'
+    } else {
+      if (spell.level === spell.maxLevel) {
+        spellLevels +=  '*\u2002'
+      } else {
+        spellLevels +=  '\u2002\u2002'
+      }
+    }
+    count++
+  })
+  embed.addField('Spell Levels', spellLevels.slice(0, spellLevels.length - 2))
+
+  let heroLevels = ''
+  count = 0
+  data.heroes.forEach(hero => {
+    heroLevels += DiscordHeroEmojis[hero.name] + ' ' + hero.level
+    if (count > 0 && count % 7 === 0) {
+      heroLevels += '\n'
+    } else {
+      if (hero.level === hero.maxLevel) {
+        heroLevels +=  '*\u2002'
+      } else {
+        heroLevels +=  '\u2002\u2002'
+      }
+    }
+    count++
+  })
+  embed.addField('Hero Levels', heroLevels.slice(0, heroLevels.length - 2))
+
+  channel.send({embed})
 }
 
 let discordReady = () => {
@@ -194,7 +387,7 @@ let discordReady = () => {
     })
   }
 
-  let apiQueue = async.queue(apiRequest, config.asyncLimit)
+  global.apiQueue = async.queue(apiRequest, config.asyncLimit)
 
   let getCurrentWar = (clanTag, done = () => {}) => {
     apiQueue.push({
@@ -210,141 +403,31 @@ let discordReady = () => {
     })
   }
 
-  async.each(config.clans, (clan, done) => {
-    findRemoveSync('.node-persist/storage', { age: { seconds: 60 * 60 * 24 * 9 } }) // Cleanup Files older than a week + 2 days for prep / war day.
-    getCurrentWar(clan.tag.toUpperCase().replace(/O/g, '0'), data => {
-      if (data && data.reason != 'accessDenied' && data.state != 'notInWar') {
-        let sha1 = crypto.createHash('sha1')
-        let clanTag = data.clan.tag
-        let opponentTag = data.opponent.tag
-        sha1.update(clanTag + opponentTag + data.preparationStartTime)
-        let warId = sha1.digest('hex')
-        WarIds[clanTag] = warId
-        let WarData = storage.getItemSync(warId)
-        if (!WarData) WarData = { lastReportedAttack: 0, prepDayReported: false, battleDayReported: false, lastHourReported: false, finalMinutesReported: false }
-        log('War ID: ' + warId + ' ' + clanTag)
-        if (data.clan.name) {
-          Clans[clanTag] = data.clan.name
-        }
-        if (data.opponent.name) {
-          Clans[opponentTag] = data.opponent.name
-        }
-        debug(data.clan.name ? (data.clan.tag + ' ' + data.clan.name) : data.clan.tag)
-        debug(data.opponent.name ? (data.opponent.tag + ' ' + data.opponent.name) : data.opponent.tag)
-        debug('Tag: ' + data.clan.tag)
-        debug('State: ' + data.state)
-        debug(util.inspect(data, { depth: null, colors: true }))
-        WarData.stats = {
-          state: data.state,
-          endTime: data.endTime,
-          startTime: data.startTime,
-          clan: {
-            tag: data.clan.tag,
-            name: data.clan.name,
-            stars: data.clan.stars,
-            attacks: data.clan.attacks,
-            destructionPercentage: data.clan.destructionPercentage,
-            memberCount: data.clan.members.length
-          },
-          opponent: {
-            tag: data.opponent.tag,
-            name: data.opponent.name,
-            stars: data.opponent.stars,
-            attacks: data.opponent.attacks,
-            destructionPercentage: data.opponent.destructionPercentage,
-            memberCount: data.opponent.members.length
-          }
-        }
-        storage.setItemSync(warId, WarData)
-        let tmpAttacks = {}
-        data.clan.members.forEach(member => {
-          Players[member.tag] = member
-          if (member.attacks) {
-            member.attacks.forEach(attack => {
-              tmpAttacks[attack.order] = Object.assign(attack, {who: 'clan'})
-            })
-          }
-        })
-        data.opponent.members.forEach(member => {
-          Players[member.tag] = member
-          if (member.attacks) {
-            member.attacks.forEach(attack => {
-              tmpAttacks[attack.order] = Object.assign(attack, {who: 'opponent'})
-            })
-          }
-        })
-        debug(util.inspect(Players, { depth: null, colors: true }))
-        let attacks = []
-        let earnedStars = {}
-        let attacked = {}
-        Object.keys(tmpAttacks).forEach(k => {
-          let attack = tmpAttacks[k]
-          let newStars = 0
-          let fresh = false
-          if (!attacked[attack.defenderTag]) {
-            fresh = true
-            attacked[attack.defenderTag] = true
-          }
-          if (earnedStars[attack.defenderTag]) {
-            newStars = attack.stars - earnedStars[attack.defenderTag]
-            if (newStars < 0) newStars = 0
-            if (earnedStars[attack.defenderTag] < attack.stars) earnedStars[attack.defenderTag] = attack.stars
-          } else {
-            earnedStars[attack.defenderTag] = attack.stars
-            newStars = attack.stars
-          }
-          attacks.push(Object.assign(attack, {newStars: newStars, fresh: fresh}))
-        })
-        // let prepStartTime = new Date(fixISO(data.preparationStartTime))
-        let startTime = new Date(fixISO(data.startTime))
-        let endTime = new Date(fixISO(data.endTime))
-        let prepTime = startTime - new Date()
-        let remainingTime = endTime - new Date()
-        if (data.state == 'preparation') {
-          if (!WarData.prepDayReported) {
-            getClanChannel(clanTag, channelId => {
-              let message = config.messages.prepDay
-              message.body = message.body.replace('%date%', startTime.toDateString()).replace('%time%', startTime.toTimeString())
-              WarData.prepDayReported = true
-              discordReportMessage(warId, WarData, clanTag, opponentTag, message, channelId)
-            })
-          }
-        }
-        if (!WarData.battleDayReported && startTime < new Date()) {
-          getClanChannel(clanTag, channelId => {
-            let message = config.messages.battleDay
-            WarData.battleDayReported = true
-            discordReportMessage(warId, WarData, clanTag, opponentTag, message, channelId)
-          })
-        }
-        if (!WarData.lastHourReported && remainingTime < 60 * 60 * 1000) {
-          getClanChannel(clanTag, channelId => {
-            let message = config.messages.lastHour
-            WarData.lastHourReported = true
-            discordReportMessage(warId, WarData, clanTag, opponentTag, message, channelId)
-          })
-        }
-        if (!WarData.finalMinutesReported && remainingTime < config.finalMinutes * 60 * 1000) {
-          getClanChannel(clanTag, channelId => {
-            let message = config.messages.finalMinutes
-            WarData.finalMinutesReported = true
-            discordReportMessage(warId, WarData, clanTag, opponentTag, message, channelId)
-          })
-        }
-        let reportFrom = WarData.lastReportedAttack
-        debug(util.inspect(attacks.slice(reportFrom), { depth: null, colors: true }))
-        attacks.slice(reportFrom).forEach(attack => {
-          getClanChannel(clanTag, channelId => {
-            discordAttackMessage(warId, WarData, clanTag, opponentTag, attack, channelId)
-          })
-        })
-        done()
-      } else if (data && data.reason == 'accessDenied') {
-        log(chalk.red.bold(clan.tag.toUpperCase().replace(/O/g, '0') + ' War Log is not public'))
-        done()
-      }
-      debug(util.inspect(data, { depth: null, colors: true }))
+  global.getPlayer = (playerTag, done = () => {}) => {
+    apiQueue.push({
+      url: COC_API_BASE + '/players/' + encodeURIComponent(playerTag),
+      done: done
     })
+  }
+
+  async.each(AnnounceClans, (clan, done) => {
+    try {
+      let newClan = new Clan(clan.tag)
+      // console.log(newClan)
+      clan.channels.forEach(id => {
+        newClan.addChannel(id)
+      })
+      newClan.fetchCurrentWar(apiQueue, done)
+      Clans[newClan.getTag()] = newClan
+    } catch (err) {
+      if (err === 'missingTag') {
+        console.log('Attempted to create a Clan() with no tag.')
+      } else if (err === 'emptyTag') {
+        console.log('Attempted to create a Clan() with an empty string.')
+      } else {
+        console.log(err)
+      }
+    }
   }, function(err) {
     setTimeout(discordReady, 1000 * config.updateInterval)
   })
@@ -353,32 +436,150 @@ let discordReady = () => {
 DiscordClient.on('message', message => {
   let messageContent = message.content.trim()
   if (messageContent.slice(0, 1) === '!') {
+    let channelId = message.channel.id
     let splitMessage = messageContent.split(' ')
-    if (splitMessage[0].toLowerCase() === '!warstats') {
-      let channelId = message.channel.id
-      if (splitMessage[1]) {
-        if (Clans[splitMessage[1]]) {
-          let clanTag = splitMessage[1]
-          let warId = WarIds[clanTag]
-          let WarData = storage.getItemSync(warId)
-          if (WarData) {
-            discordStatsMessage(warId, WarData, channelId)
+    if (splitMessage[0].toLowerCase() === '!info') {
+      let announcerStats = getAnnouncerStats()
+      const embed = new Discord.RichEmbed()
+      .setFooter('Announcing wars since May 29th 2017 (' + moment('2017-04-29').fromNow() + ')')
+      .setColor(0x007cff)
+      .addField('Instance Owned By', config.owner, true)
+      .addField('Node Version', '[' + process.version + '](https://nodejs.org)', true)
+      .addField('Discord.JS Version', '[' + Discord.version + '](https://github.com/hydrabolt/discord.js)', true)
+      .addField('Tracking Stats', 'Announcing stats for ' + announcerStats.clanCount + ' clan' + ((announcerStats.clanCount != 1) ? 's' : '') + ' across ' + announcerStats.channelCount + ' channel' + ((announcerStats.channelCount != 1) ? 's' : ''))
+      .addField('Clash of Clans War Announcer', 'This is an insance of [Discord CoC War Announcer](https://github.com/spAnser/discord-coc-war-announcer). A node.js discord bot written to monitor the Clash of Clans API and announce war attacks to a discord channel.')
+
+      message.channel.send({embed})
+    } else if (splitMessage[0].toLowerCase() === '!announce') {
+      if (message.member.hasPermission('MANAGE_CHANNELS')) {
+        if (splitMessage[1]) {
+          let clanTag = splitMessage[1].toUpperCase().replace(/O/g, '0')
+          if (!Clans[clanTag]) {
+            let newClan = new Clan(clanTag)
+            newClan.addChannel(message.channel.id)
+            newClan.fetchCurrentWar(apiQueue)
+            Clans[newClan.getTag()] = newClan
           } else {
-            message.channel.sendMessage('War data is missing try again in a little bit. I might still be fetching the data.')
+            Clans[clanTag].addChannel(message.channel.id)
+          }
+          let announcingIndex = announcingClan(clanTag)
+          if (typeof announcingIndex === 'undefined') {
+            AnnounceClans.push({
+              tag: clanTag,
+              channels: [
+                channelId
+              ]
+            })
+            message.channel.send('War announcements for ' + clanTag + ' registered in this channel.')
+          } else {
+            if (AnnounceClans[announcingIndex].channels.indexOf(channelId) > -1) {
+              message.channel.send('Provided clanTag is already registered to this channel.')
+            } else {
+              AnnounceClans[announcingIndex].channels.push(channelId)
+              message.channel.send('War announcements for ' + clanTag + ' registered in this channel.')
+            }
+          }
+          Storage.setItemSync('AnnounceClans', AnnounceClans)
+        } else {
+          message.channel.send('Please provide a clan tag to start announcements for.\n```\n!announce #clanTag\n```')
+        }
+      } else {
+        message.channel.send('Someone with the permissions to manage channels needs to run that command.')
+      }
+    } else if (splitMessage[0].toLowerCase() === '!unannounce') {
+      if (message.member.hasPermission('MANAGE_CHANNELS')) {
+        if (splitMessage[1]) {
+          let clanTag = splitMessage[1].toUpperCase().replace(/O/g, '0')
+          let announcingIndex = announcingClan(clanTag)
+          if (typeof announcingIndex !== 'undefined') {
+            let channelIndex = AnnounceClans[announcingIndex].channels.indexOf(channelId)
+            if (channelIndex > -1) {
+              if (AnnounceClans[announcingIndex].channels.length > 1) {
+                let tmpChannels = []
+                AnnounceClans[announcingIndex].channels.forEach(cId => {
+                  if (cId != channelId) {
+                    tmpChannels.push(cId)
+                  }
+                })
+                AnnounceClans[announcingIndex].channels = tmpChannels
+              } else {
+                let tmpAnnounceClans = []
+                Object.keys(AnnounceClans).forEach(aId => {
+                  if (aId != announcingIndex) {
+                    tmpAnnounceClans[aId] = AnnounceClans[aId]
+                  }
+                })
+                AnnounceClans = tmpAnnounceClans
+              }
+              message.channel.send('War announcements for ' + clanTag + ' have been stopped in this channel.')
+            } else {
+              message.channel.send('War announcements for ' + clanTag + ' were not registered in this channel.')
+            }
+            if (Clans[clanTag]) {
+              Clans[clanTag].removeChannel(channelId)
+            }
+          }
+          Storage.setItemSync('AnnounceClans', AnnounceClans)
+        } else {
+          message.channel.send('Please provide a clan tag to stop announcements for.\n```\n!unannounce #clanTag\n```')
+        }
+      } else {
+        message.channel.send('Someone with the permissions to manage channels needs to run that command.')
+      }
+    } else if (splitMessage[0].toLowerCase() === '!warstats') {
+      if (splitMessage[1]) {
+        let clanTag = splitMessage[1].toUpperCase().replace(/O/g, '0')
+        if (Clans[clanTag]) {
+          let WarData = Clans[clanTag].getWarData()
+          if (WarData) {
+            discordStatsMessage(WarData, channelId)
+          } else {
+            message.channel.send('War data is missing try again in a little bit. I might still be fetching the data.')
           }
         } else {
-          message.channel.sendMessage('I don\'t appear to have any war data for that clan.')
+          message.channel.send('I don\'t appear to have any war data for that clan.')
         }
       } else {
         getChannelClan(channelId, clanTag => {
-          let warId = WarIds[clanTag]
-          let WarData = storage.getItemSync(warId)
+          let WarData = Clans[clanTag].getWarData()
           if (WarData) {
-            discordStatsMessage(warId, WarData, channelId)
+            discordStatsMessage(WarData, channelId)
           } else {
-            message.channel.sendMessage('War data is missing try again in a little bit. I might still be fetching the data.')
+            message.channel.send('War data is missing try again in a little bit. I might still be fetching the data.')
           }
         })
+      }
+    } else if (splitMessage[0].toLowerCase() === '!hitrate') {
+      if (splitMessage[1]) {
+        let clanTag = splitMessage[1].toUpperCase().replace(/O/g, '0')
+        if (Clans[clanTag]) {
+          let clanTag = splitMessage[1]
+          let WarData = Clans[clanTag].getWarData()
+          if (WarData) {
+            discordHitrateMessage(WarData, channelId)
+          } else {
+            message.channel.send('War data is missing try again in a little bit. I might still be fetching the data.')
+          }
+        } else {
+          message.channel.send('I don\'t appear to have any war data for that clan.')
+        }
+      } else {
+        getChannelClan(channelId, clanTag => {
+          let WarData = Clans[clanTag].getWarData()
+          if (WarData) {
+            discordHitrateMessage(WarData, channelId)
+          } else {
+            message.channel.send('War data is missing try again in a little bit. I might still be fetching the data.')
+          }
+        })
+      }
+    } else if (splitMessage[0].toLowerCase() === '!playerstats') {
+      if (splitMessage[1]) {
+        getPlayer(splitMessage[1].toUpperCase().replace(/O/g, '0'), data => {
+          playerReport(message.channel, data)
+        })
+      } else {
+        message.channel.send('Please provide a player tag to look up.\n```\n!playerstats #playertag\n```')
       }
     }
   }
@@ -386,7 +587,6 @@ DiscordClient.on('message', message => {
 
 DiscordClient.on('ready', () => {
   DiscordClient.channels.forEach(channel => {
-    DiscordChannels[channel.id] = channel
     DiscordChannelEmojis[channel.id] = {}
     if (channel.type === 'text') {
       debug(channel.guild.emojis)
