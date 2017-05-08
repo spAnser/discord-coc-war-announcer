@@ -38,7 +38,13 @@ module.exports = class Clan {
   }
 
   removeChannel(id) {
-    delete this.discordChannels[this.discordChannels.indexOf(id)]
+    let tmpChannels = []
+    this.discordChannels.forEach(channel => {
+      if (channel != id) {
+        tmpChannels.push(channel)
+      }
+    })
+    this.discordChannels = tmpChannels
   }
 
   getTag() {
