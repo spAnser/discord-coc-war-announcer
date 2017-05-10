@@ -5,12 +5,6 @@ console.log('\x1Bc')
 const LOG = true
 const DEBUG = false
 
-if (!String.prototype.splice) {
-  String.prototype.splice = function(start, delCount, newSubStr) {
-    return this.slice(0, start) + newSubStr + this.slice(start + Math.abs(delCount))
-  }
-}
-
 let cleanArray = actual => {
   let newArray = []
   if (actual && actual.constructor === Array) {
@@ -24,7 +18,7 @@ let cleanArray = actual => {
 }
 
 global.fixISO = str => {
-  return str.splice(13, 0, ':').splice(11, 0, ':').splice(6, 0, '-').splice(4, 0, '-')
+  return str.substr(0,4) + "-" + str.substr(4,2) + "-" + str.substr(6,5) + ":" + str.substr(11,2) + ":" +  str.substr(13);
 }
 
 global.log = message => {
