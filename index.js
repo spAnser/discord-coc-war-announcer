@@ -6,19 +6,21 @@ const LOG = true
 const DEBUG = false
 
 let cleanArray = actual => {
-  let newArray = []
   if (actual && actual.constructor === Array) {
+    let j = 0
     for (let i = 0; i < actual.length; i++) {
       if (actual[i]) {
-        newArray.push(actual[i])
+        actual[j++] = actual[i]
       }
     }
+    actual.length = j
+    return actual
   }
-  return newArray
+  return []
 }
 
 global.fixISO = str => {
-  return str.substr(0,4) + "-" + str.substr(4,2) + "-" + str.substr(6,5) + ":" + str.substr(11,2) + ":" +  str.substr(13);
+  return str.substr(0,4) + "-" + str.substr(4,2) + "-" + str.substr(6,5) + ":" + str.substr(11,2) + ":" +  str.substr(13)
 }
 
 global.log = message => {
