@@ -13,9 +13,11 @@ if (!String.prototype.splice) {
 
 let cleanArray = actual => {
   let newArray = []
-  for (let i = 0; i < actual.length; i++) {
-    if (actual[i]) {
-      newArray.push(actual[i])
+  if (actual && actual.constructor === Array) {
+    for (let i = 0; i < actual.length; i++) {
+      if (actual[i]) {
+        newArray.push(actual[i])
+      }
     }
   }
   return newArray
