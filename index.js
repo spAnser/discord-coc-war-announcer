@@ -590,7 +590,9 @@ DiscordClient.on('message', message => {
     } else if (splitMessage[0].toLowerCase() === '!playerstats') {
       if (splitMessage[1]) {
         getPlayer(splitMessage[1].toUpperCase().replace(/O/g, '0'), data => {
-          playerReport(message.channel, data)
+          if (data && !data.hasOwnProperty('reason')) {
+            playerReport(message.channel, data)
+          }
         })
       } else {
         message.channel.send('Please provide a player tag to look up.\n```\n!playerstats #playertag\n```')
