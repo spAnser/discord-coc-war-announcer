@@ -5,24 +5,22 @@ console.log('\x1Bc')
 const LOG = true
 const DEBUG = false
 
-if (!String.prototype.splice) {
-  String.prototype.splice = function(start, delCount, newSubStr) {
-    return this.slice(0, start) + newSubStr + this.slice(start + Math.abs(delCount))
-  }
-}
-
 let cleanArray = actual => {
-  let newArray = []
-  for (let i = 0; i < actual.length; i++) {
-    if (actual[i]) {
-      newArray.push(actual[i])
+  if (actual && actual.constructor === Array) {
+    let j = 0
+    for (let i = 0; i < actual.length; i++) {
+      if (actual[i]) {
+        actual[j++] = actual[i]
+      }
     }
+    actual.length = j
+    return actual
   }
-  return newArray
+  return []
 }
 
 global.fixISO = str => {
-  return str.splice(13, 0, ':').splice(11, 0, ':').splice(6, 0, '-').splice(4, 0, '-')
+  return str.substr(0,4) + "-" + str.substr(4,2) + "-" + str.substr(6,5) + ":" + str.substr(11,2) + ":" +  str.substr(13)
 }
 
 global.log = message => {
@@ -600,7 +598,9 @@ DiscordClient.on('message', message => {
     } else if (splitMessage[0].toLowerCase() === '!playerstats') {
       if (splitMessage[1]) {
         getPlayer(splitMessage[1].toUpperCase().replace(/O/g, '0'), data => {
-          playerReport(message.channel, data)
+          if (data && !data.hasOwnProperty('reason')) {
+            playerReport(message.channel, data)
+          }
         })
       } else {
         message.channel.send('Please provide a player tag to look up.\n```\n!playerstats #playertag\n```')
