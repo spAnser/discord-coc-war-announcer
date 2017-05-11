@@ -336,12 +336,16 @@ let playerReport = (channel, data) => {
   data.troops.forEach(troop => {
     troopLevels += DiscordTroopEmojis[troop.name] + ' ' + troop.level
     if (count > 0 && count % 7 === 0) {
-      troopLevels += '\n'
+      if (troop.level === troop.maxLevel) {
+        troopLevels += '*\n'
+      } else {
+        troopLevels += '\n'
+      }
     } else {
       if (troop.level === troop.maxLevel) {
-        troopLevels +=  '*\u2002'
+        troopLevels += '*\u2002'
       } else {
-        troopLevels +=  '\u2002\u2002'
+        troopLevels += '\u2002\u2002'
       }
     }
     count++
