@@ -453,7 +453,7 @@ DiscordClient.on('message', message => {
     if (splitMessage[0].toLowerCase() === '!info') {
       let announcerStats = getAnnouncerStats()
       const embed = new Discord.RichEmbed()
-      .setFooter('Announcing wars since May 29th 2017 (' + moment('2017-04-29').fromNow() + ')')
+      .setFooter('Announcing wars since April 29th 2017 (' + moment('2017-04-29').fromNow() + ')')
       .setColor(0x007cff)
       .addField('Instance Owned By', config.owner, true)
       .addField('Node Version', '[' + process.version + '](https://nodejs.org)', true)
