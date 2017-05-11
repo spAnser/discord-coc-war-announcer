@@ -57,7 +57,15 @@ const DiscordClient = new Discord.Client()
 
 const COC_API_BASE = 'https://api.clashofclans.com/v1'
 
-global.DiscordChannelEmojis = {}
+global.DiscordChannelEmojis = {
+  'dwashield': '<:dwashield:306956561266507786>',
+  'dwashieldbroken': '<:dwashieldbroken:306956561073438720>',
+  'dwasword': '<:dwasword:306956560695951362>',
+  'dwaswordbroken': '<:dwaswordbroken:306956561073307648>',
+  'dwastarempty': '<:dwastarempty:306956560779706370>',
+  'dwastar': '<:dwastar:306956561056530442>',
+  'dwastarnew': '<:dwastarnew:306956560855465995>',
+}
 global.DiscordTownHallEmojis = [
   '<:townhall1:307293097405054976>',
   '<:townhall2:307293097748987904>',
@@ -177,7 +185,7 @@ global.getAnnouncerStats = () => {
 global.discordAttackMessage = (warId, WarData, clanTag, opponentTag, attackData, channelId) => {
   debug(clanTag)
   debug(attackData)
-  let emojis = DiscordChannelEmojis[channelId]
+  let emojis = DiscordChannelEmojis
   let clanPlayer
   let opponentPlayer
   let attackDir = 'across'
@@ -230,7 +238,7 @@ global.discordAttackMessage = (warId, WarData, clanTag, opponentTag, attackData,
 global.discordHitrateMessage = (WarData, channelId) => {
   debug(WarData)
   if (WarData.stats.state === 'inWar' || WarData.stats.state === 'warEnded') {
-    let emojis = DiscordChannelEmojis[channelId]
+    let emojis = DiscordChannelEmojis
     const embed = new Discord.RichEmbed()
     .setTitle('Attack Hitrate')
     .setFooter(WarData.stats.clan.tag + ' vs ' + WarData.stats.opponent.tag)
@@ -277,7 +285,7 @@ global.discordHitrateMessage = (WarData, channelId) => {
 
 global.discordStatsMessage = (WarData, channelId) => {
   debug(WarData)
-  let emojis = DiscordChannelEmojis[channelId]
+  let emojis = DiscordChannelEmojis
   let extraMessage = ''
   if (WarData.stats.state === 'preparation') {
     extraMessage = '\nWar starts ' + moment(WarData.stats.startTime).fromNow()
@@ -301,7 +309,7 @@ global.discordStatsMessage = (WarData, channelId) => {
 
 global.discordReportMessage = (warId, WarData, clanTag, message, channelId) => {
   debug(clanTag)
-  let emojis = DiscordChannelEmojis[channelId]
+  let emojis = DiscordChannelEmojis
   let clanPlayer
   let opponentPlayer
   // console.log(WarData)
@@ -602,37 +610,6 @@ DiscordClient.on('message', message => {
 })
 
 DiscordClient.on('ready', () => {
-  DiscordClient.channels.forEach(channel => {
-    DiscordChannelEmojis[channel.id] = {}
-    if (channel.type === 'text') {
-      debug(channel.guild.emojis)
-      channel.guild.emojis.map(emoji => {
-        DiscordChannelEmojis[channel.id][emoji.name] = '<:' + emoji.name + ':' + emoji.id + '>'
-      })
-      /* Setup Fallback Emojis */
-      if (!DiscordChannelEmojis[channel.id]['dwashield']) {
-        DiscordChannelEmojis[channel.id]['dwashield'] = '<:dwashield:306956561266507786>'
-      }
-      if (!DiscordChannelEmojis[channel.id]['dwashieldbroken']) {
-        DiscordChannelEmojis[channel.id]['dwashieldbroken'] = '<:dwashieldbroken:306956561073438720>'
-      }
-      if (!DiscordChannelEmojis[channel.id]['dwasword']) {
-        DiscordChannelEmojis[channel.id]['dwasword'] = '<:dwasword:306956560695951362>'
-      }
-      if (!DiscordChannelEmojis[channel.id]['dwaswordbroken']) {
-        DiscordChannelEmojis[channel.id]['dwaswordbroken'] = '<:dwaswordbroken:306956561073307648>'
-      }
-      if (!DiscordChannelEmojis[channel.id]['dwastarempty']) {
-        DiscordChannelEmojis[channel.id]['dwastarempty'] = '<:dwastarempty:306956560779706370>'
-      }
-      if (!DiscordChannelEmojis[channel.id]['dwastar']) {
-        DiscordChannelEmojis[channel.id]['dwastar'] = '<:dwastar:306956561056530442>'
-      }
-      if (!DiscordChannelEmojis[channel.id]['dwastarnew']) {
-        DiscordChannelEmojis[channel.id]['dwastarnew'] = '<:dwastarnew:306956560855465995>'
-      }
-    }
-  })
   discordReady()
 })
 
