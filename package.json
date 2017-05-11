@@ -22,6 +22,7 @@
     "find-remove": "^1.0.1",
     "moment": "^2.18.1",
     "node-persist": "^2.0.11",
+    "os-utils": "0.0.14",
     "simple-get": "^2.6.0",
     "uws": "^0.14.1"
   }

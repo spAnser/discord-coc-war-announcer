@@ -41,6 +41,8 @@ const findRemoveSync = require('find-remove')
 const get = require('simple-get')
 const moment = require('moment')
 const nodePersist = require('node-persist')
+const os = require('os-utils')
+
 const Clan = require('./clash-of-clans-api/clans')
 
 console.log(chalk.cyan('-'.repeat(17)))
@@ -474,6 +476,9 @@ DiscordClient.on('message', message => {
       .addField('Node Version', '[' + process.version + '](https://nodejs.org)', true)
       .addField('Discord.JS Version', '[' + Discord.version + '](https://github.com/hydrabolt/discord.js)', true)
       .addField('Tracking Stats', 'Announcing stats for ' + announcerStats.clanCount + ' clan' + ((announcerStats.clanCount != 1) ? 's' : '') + ' across ' + announcerStats.channelCount + ' channel' + ((announcerStats.channelCount != 1) ? 's' : ''))
+      .addField('Load Average', os.loadavg(10), true)
+      .addField('Process Started', moment().subtract(os.processUptime(), 's').fromNow(), true)
+      .addField('Free Memory', Math.round(os.freemem()) + 'MB', true)
       .addField('Clash of Clans War Announcer', 'This is an insance of [Discord CoC War Announcer](https://github.com/spAnser/discord-coc-war-announcer). A node.js discord bot written to monitor the Clash of Clans API and announce war attacks to a discord channel.')
 
       message.channel.send({embed})
