@@ -426,10 +426,15 @@ let discordReady = () => {
   }
 
   global.getPlayer = (playerTag, done = () => {}) => {
-    apiQueue.push({
-      url: COC_API_BASE + '/players/' + encodeURIComponent(playerTag),
-      done: done
-    })
+    playerTag = playerTag.toUpperCase().replace(/O/g, '0')
+    if (playerTag.match(/^#[0289PYLQGRJCUV]+$/)) {
+      apiQueue.push({
+        url: COC_API_BASE + '/players/' + encodeURIComponent(playerTag),
+        done: done
+      })
+    } else {
+      done('Invalid Tag')
+    }
   }
 
   async.each(AnnounceClans, (clan, done) => {
@@ -601,8 +606,10 @@ DiscordClient.on('message', message => {
       }
     } else if (splitMessage[0].toLowerCase() === '!playerstats') {
       if (splitMessage[1]) {
-        getPlayer(splitMessage[1].toUpperCase().replace(/O/g, '0'), data => {
-          if (data && !data.hasOwnProperty('reason')) {
+        getPlayer(splitMessage[1], data => {
+          if (data === 'Invalid Tag') {
+            message.channel.send('Please provide a valid player tag to look up. Valid tag characters are: \n```\n0289PYLQGRJCUV\n```')
+          } else if (data && !data.hasOwnProperty('reason')) {
             playerReport(message.channel, data)
           }
         })
