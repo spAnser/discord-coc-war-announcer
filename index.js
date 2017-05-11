@@ -483,33 +483,37 @@ DiscordClient.on('message', message => {
       if (message.member.hasPermission('MANAGE_CHANNELS')) {
         if (splitMessage[1]) {
           let clanTag = splitMessage[1].toUpperCase().replace(/O/g, '0')
-          if (!Clans[clanTag]) {
-            let newClan = new Clan(clanTag)
-            newClan.addChannel(message.channel.id)
-            newClan.fetchCurrentWar(apiQueue)
-            Clans[newClan.getTag()] = newClan
-          } else {
-            Clans[clanTag].addChannel(message.channel.id)
-          }
-          let announcingIndex = announcingClan(clanTag)
-          if (typeof announcingIndex === 'undefined') {
-            AnnounceClans.push({
-              tag: clanTag,
-              channels: [
-                channelId
-              ]
-            })
-            message.channel.send('War announcements for ' + clanTag + ' registered in this channel.')
-          } else {
-            if (AnnounceClans[announcingIndex].channels.indexOf(channelId) > -1) {
-              message.channel.send('Provided clanTag is already registered to this channel.')
+          if (clanTag.match(/^#[0289PYLQGRJCUV]+$/)) {
+            if (!Clans[clanTag]) {
+              let newClan = new Clan(clanTag)
+              newClan.addChannel(message.channel.id)
+              newClan.fetchCurrentWar(apiQueue)
+              Clans[newClan.getTag()] = newClan
             } else {
-              AnnounceClans[announcingIndex].channels.push(channelId)
-              message.channel.send('War announcements for ' + clanTag + ' registered in this channel.')
+              Clans[clanTag].addChannel(message.channel.id)
             }
+            let announcingIndex = announcingClan(clanTag)
+            if (typeof announcingIndex === 'undefined') {
+              AnnounceClans.push({
+                tag: clanTag,
+                channels: [
+                  channelId
+                ]
+              })
+              message.channel.send('War announcements for ' + clanTag + ' registered in this channel.')
+            } else {
+              if (AnnounceClans[announcingIndex].channels.indexOf(channelId) > -1) {
+                message.channel.send('Provided clanTag is already registered to this channel.')
+              } else {
+                AnnounceClans[announcingIndex].channels.push(channelId)
+                message.channel.send('War announcements for ' + clanTag + ' registered in this channel.')
+              }
+            }
+            AnnounceClans = cleanArray(AnnounceClans)
+            Storage.setItemSync('AnnounceClans', AnnounceClans)
+          } else {
+            message.channel.send('Please provide a valid clan tag to announce. Valid tag characters are: \n```\n0289PYLQGRJCUV\n```')
           }
-          AnnounceClans = cleanArray(AnnounceClans)
-          Storage.setItemSync('AnnounceClans', AnnounceClans)
         } else {
           message.channel.send('Please provide a clan tag to start announcements for.\n```\n!announce #clanTag\n```')
         }
