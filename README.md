@@ -63,22 +63,3 @@ A node.js discord bot written to monitor the Clash of Clans API and announce war
 ***A:*** No not at this time.
 1. ***Q:*** *Will this bot keep detailed statistics of our wars?*  
 ***A:*** No not at this time.
-
-## Multiple Clan Announcements
-To run multiple announcements for multiple clans simply follow the layout below. It demonstrats 3 clans to announce. Each clan will need an *Channel ID* to post annoucements to
-```javascript
-  clans: [
-    {
-      tag: '',
-      channelId: ''
-    },
-    {
-      tag: '',
-      channelId: ''
-    },
-    {
-      tag: '',
-      channelId: ''
-    }
-  ],
-```
