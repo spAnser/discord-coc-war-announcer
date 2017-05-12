@@ -2,6 +2,9 @@
 
 A node.js discord bot written to monitor the Clash of Clans API and announce war attacks to a discord channel. It will also announce when prep day has started and when war day begins. There is also a reminder message 1 hour before war ends. There is a final message that announces 15 minutes, by default, before war ends.
 
+# Support
+[Discord Server](https://discord.gg/25YjV8v)
+
 # Installation
 
 1. [Authorize Announcer](https://discordapp.com/oauth2/authorize?client_id=307275616179322881&scope=bot&permissions=134208) on your server.
