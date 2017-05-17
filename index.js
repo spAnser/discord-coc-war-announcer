@@ -593,6 +593,9 @@ DiscordClient.on('message', message => {
           if (data && !data.hasOwnProperty('reason')) {
             playerReport(message.channel, data)
           }
+          else {
+            message.channel.send('Got an error trying to get the player data')
+          }
         })
       } else {
         message.channel.send('Please provide a player tag to look up.\n```\n!playerstats #playertag\n```')
