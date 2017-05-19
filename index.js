@@ -464,10 +464,11 @@ let discordReady = () => {
 
 DiscordClient.on('message', message => {
   let messageContent = message.content.trim()
-  if (messageContent.slice(0, 1) === '!') {
+  let prefix = config.commandPrefix
+  if (messageContent.slice(0, 1) === prefix) {
     let channelId = message.channel.id
     let splitMessage = messageContent.split(' ')
-    if (splitMessage[0].toLowerCase() === '!info') {
+    if (splitMessage[0].toLowerCase() === prefix + 'info') {
       let announcerStats = getAnnouncerStats()
       const embed = new Discord.RichEmbed()
       .setFooter('Announcing wars since April 29th 2017 (' + moment('2017-04-29').fromNow() + ')')
@@ -482,9 +483,9 @@ DiscordClient.on('message', message => {
       .addField('Clash of Clans War Announcer', 'This is an insance of [Discord CoC War Announcer](https://github.com/spAnser/discord-coc-war-announcer). A node.js discord bot written to monitor the Clash of Clans API and announce war attacks to a discord channel.')
 
       message.channel.send({embed})
-    } else if (splitMessage[0].toLowerCase() === '!help') {
-      message.channel.send('1. `!announce #CLANTAG` Assign a clan to announce in a channel.\n2. `!unannounce #CLANTAG` Stop a clan from announcing in a channel.\n3. `!warstats #CLANTAG` Display war stats for a clan that is tracked by The Announcer. If not provided with a clan tag it will display war stats for all clans assigned to the channel the command was run in.\n4. `!hitrate #CLANTAG` Display hit rate stats for a clan that is tracked by The Announcer. If not provided with a clan tag it will display hit rate stats for all clans assigned to the channel the command was run in.\n5. `!playerstats #PLAYERTAG` Display player stats for any player tag provided.\n6. `!info` Display bot information.')
-    } else if (splitMessage[0].toLowerCase() === '!announce') {
+    } else if (splitMessage[0].toLowerCase() === prefix + 'help') {
+      message.channel.send('1. `' + prefix + 'announce #CLANTAG` Assign a clan to announce in a channel.\n2. `' + prefix + 'unannounce #CLANTAG` Stop a clan from announcing in a channel.\n3. `' + prefix + 'warstats #CLANTAG` Display war stats for a clan that is tracked by The Announcer. If not provided with a clan tag it will display war stats for all clans assigned to the channel the command was run in.\n4. `' + prefix + 'hitrate #CLANTAG` Display hit rate stats for a clan that is tracked by The Announcer. If not provided with a clan tag it will display hit rate stats for all clans assigned to the channel the command was run in.\n5. `' + prefix + 'playerstats #PLAYERTAG` Display player stats for any player tag provided.\n6. `' + prefix + 'info` Display bot information.').then(debug).catch(log)
+    } else if (splitMessage[0].toLowerCase() === prefix + 'announce') {
       if (message.member.hasPermission('MANAGE_CHANNELS')) {
         if (splitMessage[1]) {
           let clanTag = splitMessage[1].toUpperCase().replace(/O/g, '0')
@@ -525,7 +526,7 @@ DiscordClient.on('message', message => {
       } else {
         message.channel.send('Someone with the permissions to manage channels needs to run that command.')
       }
-    } else if (splitMessage[0].toLowerCase() === '!unannounce') {
+    } else if (splitMessage[0].toLowerCase() === prefix + 'unannounce') {
       if (message.member.hasPermission('MANAGE_CHANNELS')) {
         if (splitMessage[1]) {
           let clanTag = splitMessage[1].toUpperCase().replace(/O/g, '0')
@@ -566,7 +567,7 @@ DiscordClient.on('message', message => {
       } else {
         message.channel.send('Someone with the permissions to manage channels needs to run that command.')
       }
-    } else if (splitMessage[0].toLowerCase() === '!warstats') {
+    } else if (splitMessage[0].toLowerCase() === prefix + 'warstats') {
       if (splitMessage[1]) {
         let clanTag = splitMessage[1].toUpperCase().replace(/O/g, '0')
         if (Clans[clanTag]) {
@@ -589,7 +590,7 @@ DiscordClient.on('message', message => {
           }
         })
       }
-    } else if (splitMessage[0].toLowerCase() === '!hitrate') {
+    } else if (splitMessage[0].toLowerCase() === prefix + 'hitrate') {
       if (splitMessage[1]) {
         let clanTag = splitMessage[1].toUpperCase().replace(/O/g, '0')
         if (Clans[clanTag]) {
@@ -613,7 +614,7 @@ DiscordClient.on('message', message => {
           }
         })
       }
-    } else if (splitMessage[0].toLowerCase() === '!playerstats') {
+    } else if (splitMessage[0].toLowerCase() === prefix + 'playerstats') {
       if (splitMessage[1]) {
         getPlayer(splitMessage[1], data => {
           if (data === 'Invalid Tag') {

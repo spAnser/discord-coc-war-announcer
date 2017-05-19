@@ -2,6 +2,7 @@ module.exports = {
   owner: '', // Put your discord tag here
   asyncLimit: 5,
   updateInterval: 60 * 2, // 2 Minutes
+  commandPrefix: '!',
   coc: {
     apiKey: '',
   },
