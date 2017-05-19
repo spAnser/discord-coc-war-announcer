@@ -5,7 +5,7 @@ console.log('\x1Bc')
 const LOG = true
 const DEBUG = false
 
-let cleanArray = actual => {
+global.cleanArray = actual => {
   if (actual && actual.constructor === Array) {
     let j = 0
     for (let i = 0; i < actual.length; i++) {
@@ -581,8 +581,13 @@ DiscordClient.on('message', message => {
         let clanTag = splitMessage[1].toUpperCase().replace(/O/g, '0')
         if (Clans[clanTag]) {
           let WarData = Clans[clanTag].getWarData()
+          let AnnouncingClan = AnnounceClans[announcingClan(clanTag)]
           if (WarData) {
             discordStatsMessage(WarData, channelId)
+          } else if (AnnouncingClan.state === 'notInWar') {
+            message.channel.send(clanTag + ' is not currently in war.').then(debug).catch(log)
+          } else if (AnnouncingClan.reason === 'accessDenied') {
+            message.channel.send(clanTag + '\'s war log is not public.').then(debug).catch(log)
           } else {
             message.channel.send('War data is missing try again in a little bit. I might still be fetching the data.').then(debug).catch(log)
           }
@@ -592,8 +597,13 @@ DiscordClient.on('message', message => {
       } else {
         getChannelClan(channelId, clanTag => {
           let WarData = Clans[clanTag].getWarData()
+          let AnnouncingClan = AnnounceClans[announcingClan(clanTag)]
           if (WarData) {
             discordStatsMessage(WarData, channelId)
+          } else if (AnnouncingClan.state === 'notInWar') {
+            message.channel.send(clanTag + ' is not currently in war.').then(debug).catch(log)
+          } else if (AnnouncingClan.reason === 'accessDenied') {
+            message.channel.send(clanTag + '\'s war log is not public.').then(debug).catch(log)
           } else {
             message.channel.send('War data is missing try again in a little bit. I might still be fetching the data.').then(debug).catch(log)
           }
@@ -605,8 +615,13 @@ DiscordClient.on('message', message => {
         if (Clans[clanTag]) {
           let clanTag = splitMessage[1]
           let WarData = Clans[clanTag].getWarData()
+          let AnnouncingClan = AnnounceClans[announcingClan(clanTag)]
           if (WarData) {
             discordHitrateMessage(WarData, channelId)
+          } else if (AnnouncingClan.state === 'notInWar') {
+            message.channel.send(clanTag + ' is not currently in war.').then(debug).catch(log)
+          } else if (AnnouncingClan.reason === 'accessDenied') {
+            message.channel.send(clanTag + '\'s war log is not public.').then(debug).catch(log)
           } else {
             message.channel.send('War data is missing try again in a little bit. I might still be fetching the data.').then(debug).catch(log)
           }

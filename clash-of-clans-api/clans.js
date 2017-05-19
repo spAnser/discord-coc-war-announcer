@@ -5,6 +5,8 @@ const DEBUG = false
 
 const crypto = require('crypto')
 const util = require('util')
+
+const chalk = require('chalk')
 const nodePersist = require('node-persist')
 
 global.ClanStorage = nodePersist.create({
@@ -295,10 +297,31 @@ module.exports = class Clan {
           })
         })
       }
-    } else if (data && data.reason == 'notInWar') {
-      log(chalk.orange.bold(clan.tag.toUpperCase().replace(/O/g, '0') + ' Clan is not currently in war.'))
-    } else if (data && data.reason == 'accessDenied') {
-      log(chalk.red.bold(clan.tag.toUpperCase().replace(/O/g, '0') + ' War Log is not public'))
+    }
+    if (data) {
+      let announcingIndex = announcingClan(this.tag)
+      AnnounceClans[announcingIndex].reason = data.reason
+      AnnounceClans[announcingIndex].state = data.state
+
+      if (data.state == 'notInWar') {
+        log(chalk.yellow.bold(this.tag.toUpperCase().replace(/O/g, '0') + ' Clan is not currently in war.'))
+      }
+      if (data.reason == 'accessDenied' && !AnnounceClans[announcingIndex].notPublicReported) {
+        AnnounceClans[announcingIndex].notPublicReported = true
+        getClanChannel(this.tag, channels => {
+          channels.forEach(channelId => {
+            getChannelById(channelId, discordChannel => {
+              if (discordChannel) discordChannel.send(this.tag + '\'s war log is not public.').then(debug).catch(log)
+            })
+          })
+        })
+        log(chalk.red.bold(this.tag.toUpperCase().replace(/O/g, '0') + ' War Log is not public'))
+      } else {
+        AnnounceClans[announcingIndex].notPublicReported = undefined
+      }
+
+      AnnounceClans = cleanArray(AnnounceClans)
+      Storage.setItemSync('AnnounceClans', AnnounceClans)
     }
   }
 
@@ -306,7 +329,7 @@ module.exports = class Clan {
     apiQueue.push({
       url: COC_API_BASE + '/clans/' + encodeURIComponent(this.tag) + '/currentwar',
       done: (data) => {
-        if (!data.reason && !data.error) this.parseCurrentWar(data)
+        if (!data.error) this.parseCurrentWar(data)
         done()
       }
     })
