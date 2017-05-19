@@ -621,6 +621,9 @@ DiscordClient.on('message', message => {
             message.channel.send('Please provide a valid player tag to look up. Valid tag characters are: \n```\n0289PYLQGRJCUV\n```').then(debug).catch(log)
           } else if (data && !data.hasOwnProperty('reason')) {
             playerReport(message.channel, data)
+          } else {
+            message.channel.send('Got an error trying to get the player data')
+            // TODO: include the error code and reason in the returned response to the user for easier troubleshooting
           }
         })
       } else {
