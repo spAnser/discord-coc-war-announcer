@@ -231,7 +231,7 @@ global.discordAttackMessage = (warId, WarData, clanTag, opponentTag, attackData,
   WarData.lastReportedAttack = attackData.order
   ClanStorage.setItemSync(warId, WarData)
   getChannelById(channelId, discordChannel => {
-    if (discordChannel) discordChannel.send({embed})
+    if (discordChannel) discordChannel.send({embed}).then(debug).catch(log)
   })
 }
 
@@ -278,7 +278,7 @@ global.discordHitrateMessage = (WarData, channelId) => {
     })
   } else {
     getChannelById(channelId, discordChannel => {
-      if (discordChannel) discordChannel.send('No hitrate stats for this war check back later.')
+      if (discordChannel) discordChannel.send('No hitrate stats for this war check back later.').then(debug).catch(log)
     })
   }
 }
@@ -321,7 +321,7 @@ global.discordReportMessage = (warId, WarData, clanTag, message, channelId) => {
 
   ClanStorage.setItemSync(warId, WarData)
   getChannelById(channelId, discordChannel => {
-    if (discordChannel) discordChannel.send({embed})
+    if (discordChannel) discordChannel.send({embed}).then(debug).catch(log)
   })
 }
 
@@ -388,7 +388,7 @@ let playerReport = (channel, data) => {
   })
   embed.addField('Hero Levels', heroLevels.slice(0, heroLevels.length - 2))
 
-  channel.send({embed})
+  channel.send({embed}).then(debug).catch(log)
 }
 
 let discordReady = () => {
@@ -480,9 +480,9 @@ DiscordClient.on('message', message => {
       .addField('Load Average', os.loadavg(10), true)
       .addField('Process Started', moment().subtract(os.processUptime(), 's').fromNow(), true)
       .addField('Free Memory', Math.round(os.freemem()) + 'MB', true)
-      .addField('Clash of Clans War Announcer', 'This is an insance of [Discord CoC War Announcer](https://github.com/spAnser/discord-coc-war-announcer). A node.js discord bot written to monitor the Clash of Clans API and announce war attacks to a discord channel.')
+      .addField('Clash of Clans War Announcer', 'This is an instance of [Discord CoC War Announcer](https://github.com/spAnser/discord-coc-war-announcer). A node.js discord bot written to monitor the Clash of Clans API and announce war attacks to a discord channel.')
 
-      message.channel.send({embed})
+      message.channel.send({embed}).then(debug).catch(log)
     } else if (splitMessage[0].toLowerCase() === prefix + 'help') {
       message.channel.send('1. `' + prefix + 'announce #CLANTAG` Assign a clan to announce in a channel.\n2. `' + prefix + 'unannounce #CLANTAG` Stop a clan from announcing in a channel.\n3. `' + prefix + 'warstats #CLANTAG` Display war stats for a clan that is tracked by The Announcer. If not provided with a clan tag it will display war stats for all clans assigned to the channel the command was run in.\n4. `' + prefix + 'hitrate #CLANTAG` Display hit rate stats for a clan that is tracked by The Announcer. If not provided with a clan tag it will display hit rate stats for all clans assigned to the channel the command was run in.\n5. `' + prefix + 'playerstats #PLAYERTAG` Display player stats for any player tag provided.\n6. `' + prefix + 'info` Display bot information.').then(debug).catch(log)
     } else if (splitMessage[0].toLowerCase() === prefix + 'announce') {
@@ -506,25 +506,25 @@ DiscordClient.on('message', message => {
                   channelId
                 ]
               })
-              message.channel.send('War announcements for ' + clanTag + ' registered in this channel.')
+              message.channel.send('War announcements for ' + clanTag + ' registered in this channel.').then(debug).catch(log)
             } else {
               if (AnnounceClans[announcingIndex].channels.indexOf(channelId) > -1) {
-                message.channel.send('Provided clanTag is already registered to this channel.')
+                message.channel.send('Provided clanTag is already registered to this channel.').then(debug).catch(log)
               } else {
                 AnnounceClans[announcingIndex].channels.push(channelId)
-                message.channel.send('War announcements for ' + clanTag + ' registered in this channel.')
+                message.channel.send('War announcements for ' + clanTag + ' registered in this channel.').then(debug).catch(log)
               }
             }
             AnnounceClans = cleanArray(AnnounceClans)
             Storage.setItemSync('AnnounceClans', AnnounceClans)
           } else {
-            message.channel.send('Please provide a valid clan tag to announce. Valid tag characters are: \n```\n0289PYLQGRJCUV\n```')
+            message.channel.send('Please provide a valid clan tag to announce. Valid tag characters are: \n```\n0289PYLQGRJCUV\n```').then(debug).catch(log)
           }
         } else {
-          message.channel.send('Please provide a clan tag to start announcements for.\n```\n!announce #clanTag\n```')
+          message.channel.send('Please provide a clan tag to start announcements for.\n```\n!announce #clanTag\n```').then(debug).catch(log)
         }
       } else {
-        message.channel.send('Someone with the permissions to manage channels needs to run that command.')
+        message.channel.send('Someone with the permissions to manage channels needs to run that command.').then(debug).catch(log)
       }
     } else if (splitMessage[0].toLowerCase() === prefix + 'unannounce') {
       if (message.member.hasPermission('MANAGE_CHANNELS')) {
@@ -551,9 +551,9 @@ DiscordClient.on('message', message => {
                 })
                 AnnounceClans = tmpAnnounceClans
               }
-              message.channel.send('War announcements for ' + clanTag + ' have been stopped in this channel.')
+              message.channel.send('War announcements for ' + clanTag + ' have been stopped in this channel.').then(debug).catch(log)
             } else {
-              message.channel.send('War announcements for ' + clanTag + ' were not registered in this channel.')
+              message.channel.send('War announcements for ' + clanTag + ' were not registered in this channel.').then(debug).catch(log)
             }
             if (Clans[clanTag]) {
               Clans[clanTag].removeChannel(channelId)
@@ -562,10 +562,10 @@ DiscordClient.on('message', message => {
           AnnounceClans = cleanArray(AnnounceClans)
           Storage.setItemSync('AnnounceClans', AnnounceClans)
         } else {
-          message.channel.send('Please provide a clan tag to stop announcements for.\n```\n!unannounce #clanTag\n```')
+          message.channel.send('Please provide a clan tag to stop announcements for.\n```\n!unannounce #clanTag\n```').then(debug).catch(log)
         }
       } else {
-        message.channel.send('Someone with the permissions to manage channels needs to run that command.')
+        message.channel.send('Someone with the permissions to manage channels needs to run that command.').then(debug).catch(log)
       }
     } else if (splitMessage[0].toLowerCase() === prefix + 'warstats') {
       if (splitMessage[1]) {
@@ -575,10 +575,10 @@ DiscordClient.on('message', message => {
           if (WarData) {
             discordStatsMessage(WarData, channelId)
           } else {
-            message.channel.send('War data is missing try again in a little bit. I might still be fetching the data.')
+            message.channel.send('War data is missing try again in a little bit. I might still be fetching the data.').then(debug).catch(log)
           }
         } else {
-          message.channel.send('I don\'t appear to have any war data for that clan.')
+          message.channel.send('I don\'t appear to have any war data for that clan.').then(debug).catch(log)
         }
       } else {
         getChannelClan(channelId, clanTag => {
@@ -586,7 +586,7 @@ DiscordClient.on('message', message => {
           if (WarData) {
             discordStatsMessage(WarData, channelId)
           } else {
-            message.channel.send('War data is missing try again in a little bit. I might still be fetching the data.')
+            message.channel.send('War data is missing try again in a little bit. I might still be fetching the data.').then(debug).catch(log)
           }
         })
       }
@@ -599,10 +599,10 @@ DiscordClient.on('message', message => {
           if (WarData) {
             discordHitrateMessage(WarData, channelId)
           } else {
-            message.channel.send('War data is missing try again in a little bit. I might still be fetching the data.')
+            message.channel.send('War data is missing try again in a little bit. I might still be fetching the data.').then(debug).catch(log)
           }
         } else {
-          message.channel.send('I don\'t appear to have any war data for that clan.')
+          message.channel.send('I don\'t appear to have any war data for that clan.').then(debug).catch(log)
         }
       } else {
         getChannelClan(channelId, clanTag => {
@@ -610,7 +610,7 @@ DiscordClient.on('message', message => {
           if (WarData) {
             discordHitrateMessage(WarData, channelId)
           } else {
-            message.channel.send('War data is missing try again in a little bit. I might still be fetching the data.')
+            message.channel.send('War data is missing try again in a little bit. I might still be fetching the data.').then(debug).catch(log)
           }
         })
       }
@@ -618,13 +618,13 @@ DiscordClient.on('message', message => {
       if (splitMessage[1]) {
         getPlayer(splitMessage[1], data => {
           if (data === 'Invalid Tag') {
-            message.channel.send('Please provide a valid player tag to look up. Valid tag characters are: \n```\n0289PYLQGRJCUV\n```')
+            message.channel.send('Please provide a valid player tag to look up. Valid tag characters are: \n```\n0289PYLQGRJCUV\n```').then(debug).catch(log)
           } else if (data && !data.hasOwnProperty('reason')) {
             playerReport(message.channel, data)
           }
         })
       } else {
-        message.channel.send('Please provide a player tag to look up.\n```\n!playerstats #playertag\n```')
+        message.channel.send('Please provide a player tag to look up.\n```\n!playerstats #playertag\n```').then(debug).catch(log)
       }
     }
   }
