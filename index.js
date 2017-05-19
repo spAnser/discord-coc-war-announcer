@@ -312,8 +312,8 @@ global.discordReportMessage = (warId, WarData, clanTag, message, channelId) => {
   let emojis = DiscordChannelEmojis
   let clanPlayer
   let opponentPlayer
-  // console.log(WarData)
-  // console.log(Clans[clanTag])
+  // log(WarData)
+  // log(Clans[clanTag])
   const embed = new Discord.RichEmbed()
   .setTitle(Clans[clanTag].name + ' vs ' + Clans[clanTag].opponent.name)
   .setColor(message.color)
@@ -326,12 +326,17 @@ global.discordReportMessage = (warId, WarData, clanTag, message, channelId) => {
 }
 
 let playerReport = (channel, data) => {
-  // log(data)
+  debug(data)
 
   let embed = new Discord.RichEmbed()
-  .setTitle(data.name + ' ' + data.tag)
-  .setDescription(data.clan.name + '\n' + data.clan.tag)
+  .setAuthor(data.name + ' ' + data.tag, data.league.iconUrls.small)
+  .setFooter(data.role + ' of ' + data.clan.name + ' ' + data.clan.tag, data.clan.badgeUrls.small)
   .setThumbnail('https://coc.guide/static/imgs/other/town-hall-' + data.townHallLevel + '.png')
+
+  embed.addField('League', data.league.name, true)
+  embed.addField('Trophies', data.trophies , true)
+  embed.addField('War Stars', data.warStars , true)
+  embed.addField('Best Trophies', data.bestTrophies, true)
   
   let troopLevels = ''
   let count = 0
@@ -359,7 +364,11 @@ let playerReport = (channel, data) => {
   data.spells.forEach(spell => {
     spellLevels += DiscordSpellEmojis[spell.name] + ' ' + spell.level
     if (count > 0 && count % 7 === 0) {
-      spellLevels += '\n'
+      if (spell.level === spell.maxLevel) {
+        spellLevels += '*\n'
+      } else {
+        spellLevels += '\n'
+      }
     } else {
       if (spell.level === spell.maxLevel) {
         spellLevels +=  '*\u2002'

@@ -62,8 +62,9 @@ module.exports = class Clan {
       sha1.update(this.tag + opponentTag + data.preparationStartTime)
       this.warId = sha1.digest('hex')
 
-      this.WarData = ClanStorage.getItemSync(this.warId)
-      if (!this.WarData) this.WarData = { lastReportedAttack: 0, prepDayReported: false, battleDayReported: false, lastHourReported: false, finalMinutesReported: false }
+      let defaultWarData = { lastReportedAttack: 0, prepDayReported: false, battleDayReported: false, lastHourReported: false, finalMinutesReported: false, endStatsReported: false }
+      this.WarData = ClanStorage.getItemSync(this.warId) || {}
+      this.WarData = Object.assign(defaultWarData, this.WarData)
       log('War ID: ' + this.warId + ' ' + this.tag)
       if (data.clan.name) {
         this.name = data.clan.name
@@ -285,6 +286,15 @@ module.exports = class Clan {
           })
         })
       })
+      if (!this.WarData.endStatsReported && data.state == 'warEnded') {
+        this.WarData.endStatsReported = true
+        ClanStorage.setItemSync(this.warId, this.WarData)
+        getClanChannel(this.tag, channels => {
+          channels.forEach(channelId => {
+            discordStatsMessage(this.WarData, channelId)
+          })
+        })
+      }
     } else if (data && data.reason == 'notInWar') {
       log(chalk.orange.bold(clan.tag.toUpperCase().replace(/O/g, '0') + ' Clan is not currently in war.'))
     } else if (data && data.reason == 'accessDenied') {
