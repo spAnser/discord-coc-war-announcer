@@ -622,7 +622,7 @@ DiscordClient.on('message', message => {
           } else if (data && !data.hasOwnProperty('reason')) {
             playerReport(message.channel, data)
           } else {
-            message.channel.send('Got an error trying to get the player data')
+            message.channel.send('There was an error fetching the player data.')
             // TODO: include the error code and reason in the returned response to the user for easier troubleshooting
           }
         })
