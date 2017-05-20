@@ -426,6 +426,7 @@ let playerReport = (channel, data) => {
   embed.addField('Trophies', data.trophies , true)
   embed.addField('War Stars', data.warStars , true)
   embed.addField('Best Trophies', data.bestTrophies, true)
+  console.log(embed)
 
   let troopLevels = ''
   let count = 0
@@ -446,7 +447,7 @@ let playerReport = (channel, data) => {
     }
     count++
   })
-  embed.addField('Troop Levels', troopLevels.slice(0, troopLevels.length - 2))
+  if (troopLevels) embed.addField('Troop Levels', troopLevels.slice(0, troopLevels.length - 2))
 
   let spellLevels = ''
   count = 0
@@ -467,7 +468,7 @@ let playerReport = (channel, data) => {
     }
     count++
   })
-  embed.addField('Spell Levels', spellLevels.slice(0, spellLevels.length - 2))
+  if (spellLevels) embed.addField('Spell Levels', spellLevels.slice(0, spellLevels.length - 2))
 
   let heroLevels = ''
   count = 0
@@ -488,7 +489,7 @@ let playerReport = (channel, data) => {
     }
     count++
   })
-  embed.addField('Hero Levels', heroLevels.slice(0, heroLevels.length - 2))
+  if (heroLevels) embed.addField('Hero Levels', heroLevels.slice(0, heroLevels.length - 2))
 
   channel.send({embed}).then(debug).catch(log)
 }
