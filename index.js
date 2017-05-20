@@ -159,6 +159,46 @@ global.getChannelClan = (channelId, done) => {
   })
 }
 
+global.ChannelSettings = Storage.getItemSync('ChannelSettings')
+ChannelSettings = cleanArray(ChannelSettings)
+if (!ChannelSettings) ChannelSettings = []
+Storage.setItemSync('ChannelSettings', ChannelSettings)
+
+global.channelSettingsInit = (channelId) => {
+  let found = false
+  ChannelSettings.forEach(channel => {
+    if (channel.id === channelId) {
+      found = true
+    }
+  })
+  if (!found) {
+    ChannelSettings.push({ id: channelId })
+  }
+}
+
+
+global.channelSettingsGet = (channelId, option) => {
+  let returnValue
+  ChannelSettings.forEach(channel => {
+    if (channel.id === channelId) {
+      returnValue = channel[option]
+    }
+  })
+  return returnValue
+}
+
+global.channelSettingsSet = (channelId, option, value) => {
+  channelSettingsInit(channelId)
+  ChannelSettings.forEach(channel => {
+    if (channel.id === channelId) {
+      channel[option] = value
+    }
+  })
+  console.log(ChannelSettings)
+  ChannelSettings = cleanArray(ChannelSettings)
+  Storage.setItemSync('ChannelSettings', ChannelSettings)
+}
+
 global.getChannelById = (channelId, done) => {
   DiscordClient.channels.forEach(channel => {
     if (channel.id == channelId) done(channel)
@@ -185,6 +225,8 @@ global.getAnnouncerStats = () => {
 global.discordAttackMessage = (warId, WarData, clanTag, opponentTag, attackData, channelId) => {
   debug(clanTag)
   debug(attackData)
+  let style = channelSettingsGet(channelId, 'style')
+  if (!style) style = 6
   let emojis = DiscordChannelEmojis
   let clanPlayer
   let opponentPlayer
@@ -218,20 +260,60 @@ global.discordAttackMessage = (warId, WarData, clanTag, opponentTag, attackData,
   } else if (attackDir === 'down') {
     attackMessage += '\uD83D\uDD3B' // 🔻
   }
-  attackMessage += '\n' + attackData.attackerTag
-  defendMessage += '\n' + attackData.defenderTag
-  const embed = new Discord.RichEmbed()
-  .setFooter(WarData.stats.clan.tag + ' vs ' + WarData.stats.opponent.tag)
-  .setColor(StarColors[attackData.stars])
-  .addField(clanPlayer.name, (attackData.who === 'clan') ? attackMessage : defendMessage, true)
-  .addField(DiscordTownHallEmojis[clanPlayer.townhallLevel - 1] + ' ' + clanPlayer.mapPosition + ' vs ' + opponentPlayer.mapPosition + ' ' + DiscordTownHallEmojis[opponentPlayer.townhallLevel - 1], emojis.dwastar.repeat(attackData.stars-attackData.newStars) + emojis.dwastarnew.repeat(attackData.newStars) + emojis.dwastarempty.repeat(3 - attackData.stars) + '\n\t\t' + attackData.destructionPercentage + '%', true)
-  .addField(opponentPlayer.name, (attackData.who === 'clan') ? defendMessage : attackMessage, true)
-  .addField(WarData.stats.clan.name + ' vs ' + WarData.stats.opponent.name, '\u200b')
+  let messageStars = emojis.dwastar.repeat(attackData.stars-attackData.newStars) + emojis.dwastarnew.repeat(attackData.newStars) + emojis.dwastarempty.repeat(3 - attackData.stars)
+  let embed
+  let text
+  // \u200e = LEFT-TO-RIGHT MARK
+  if (style === 1) {
+    text = ''
+    text += DiscordTownHallEmojis[clanPlayer.townhallLevel - 1] + ' ' + clanPlayer.name + '\u200e ' + emojis.dwasword
+    text += messageStars + ' ' + attackData.destructionPercentage + '%'
+    text += emojis.dwashieldbroken + ' ' + opponentPlayer.name + '\u200e ' + DiscordTownHallEmojis[opponentPlayer.townhallLevel - 1]
+  } else if (style === 2) {
+    text = ''
+    text += clanPlayer.name + '\u200e [' + clanPlayer.mapPosition + '] ' + DiscordTownHallEmojis[clanPlayer.townhallLevel - 1] + ' ' + attackMessage
+    text += messageStars + ' ' + attackData.destructionPercentage + '%'
+    text += emojis.dwashieldbroken + ' ' + DiscordTownHallEmojis[opponentPlayer.townhallLevel - 1] + ' [' + opponentPlayer.mapPosition + '] ' + opponentPlayer.name
+  } else if (style === 3) {
+    embed = new Discord.RichEmbed()
+    .setColor(StarColors[attackData.stars])
+    .addField(clanPlayer.name, (attackData.who === 'clan') ? attackMessage : defendMessage, true)
+    .addField(DiscordTownHallEmojis[clanPlayer.townhallLevel - 1] + ' ' + clanPlayer.mapPosition + ' vs ' + opponentPlayer.mapPosition + ' ' + DiscordTownHallEmojis[opponentPlayer.townhallLevel - 1], messageStars + '\n\t\t' + attackData.destructionPercentage + '%', true)
+    .addField(opponentPlayer.name, (attackData.who === 'clan') ? defendMessage : attackMessage, true)
+  } else if (style === 4) {
+    attackMessage += '\n' + attackData.attackerTag
+    defendMessage += '\n' + attackData.defenderTag
+    embed = new Discord.RichEmbed()
+    .setColor(StarColors[attackData.stars])
+    .addField(clanPlayer.name, (attackData.who === 'clan') ? attackMessage : defendMessage, true)
+    .addField(DiscordTownHallEmojis[clanPlayer.townhallLevel - 1] + ' ' + clanPlayer.mapPosition + ' vs ' + opponentPlayer.mapPosition + ' ' + DiscordTownHallEmojis[opponentPlayer.townhallLevel - 1], messageStars + '\n\t\t' + attackData.destructionPercentage + '%', true)
+    .addField(opponentPlayer.name, (attackData.who === 'clan') ? defendMessage : attackMessage, true)
+  } else if (style === 5) {
+    attackMessage += '\n' + WarData.stats.clan.name
+    defendMessage += '\n' + WarData.stats.opponent.name
+    embed = new Discord.RichEmbed()
+    .setColor(StarColors[attackData.stars])
+    .addField(clanPlayer.name, (attackData.who === 'clan') ? attackMessage : defendMessage, true)
+    .addField(DiscordTownHallEmojis[clanPlayer.townhallLevel - 1] + ' ' + clanPlayer.mapPosition + ' vs ' + opponentPlayer.mapPosition + ' ' + DiscordTownHallEmojis[opponentPlayer.townhallLevel - 1], messageStars + '\n\t\t' + attackData.destructionPercentage + '%', true)
+    .addField(opponentPlayer.name, (attackData.who === 'clan') ? defendMessage : attackMessage, true)
+  } else if (style === 6) {
+    attackMessage += '\n' + attackData.attackerTag
+    defendMessage += '\n' + attackData.defenderTag
+    embed = new Discord.RichEmbed()
+    .setColor(StarColors[attackData.stars])
+    .addField(clanPlayer.name, (attackData.who === 'clan') ? attackMessage : defendMessage, true)
+    .addField(DiscordTownHallEmojis[clanPlayer.townhallLevel - 1] + ' ' + clanPlayer.mapPosition + ' vs ' + opponentPlayer.mapPosition + ' ' + DiscordTownHallEmojis[opponentPlayer.townhallLevel - 1], messageStars + '\n\t\t' + attackData.destructionPercentage + '%', true)
+    .addField(opponentPlayer.name, (attackData.who === 'clan') ? defendMessage : attackMessage, true)
+    .addField(WarData.stats.clan.name, WarData.stats.clan.tag, true)
+    .addField('\u200b', '\u200b', true)
+    .addField(WarData.stats.opponent.name, WarData.stats.opponent.tag, true)
+  }
 
   WarData.lastReportedAttack = attackData.order
   ClanStorage.setItemSync(warId, WarData)
   getChannelById(channelId, discordChannel => {
-    if (discordChannel) discordChannel.send({embed}).then(debug).catch(log)
+    if (discordChannel && embed) discordChannel.send({embed}).then(debug).catch(log)
+    if (discordChannel && text) discordChannel.send(text).then(debug).catch(log)
   })
 }
 
@@ -335,15 +417,16 @@ let playerReport = (channel, data) => {
   debug(data)
 
   let embed = new Discord.RichEmbed()
-  .setAuthor(data.name + ' ' + data.tag, (data.league) ? data.league.iconUrls.small : '\u2002')
-  .setFooter(data.role + ' of ' + data.clan.name + ' ' + data.clan.tag, data.clan.badgeUrls.small)
+  .setAuthor(data.name + '\u200e ' + data.tag, (data.league) ? data.league.iconUrls.small : null)
   .setThumbnail('https://coc.guide/static/imgs/other/town-hall-' + data.townHallLevel + '.png')
+
+  if (data.clan) embed.setFooter(data.role + ' of ' + data.clan.name + '\u200e ' + data.clan.tag, data.clan.badgeUrls.small)
 
   embed.addField('League', (data.league) ? data.league.name : 'n/a', true)
   embed.addField('Trophies', data.trophies , true)
   embed.addField('War Stars', data.warStars , true)
   embed.addField('Best Trophies', data.bestTrophies, true)
-  
+
   let troopLevels = ''
   let count = 0
   data.troops.forEach(troop => {
@@ -391,7 +474,11 @@ let playerReport = (channel, data) => {
   data.heroes.forEach(hero => {
     heroLevels += DiscordHeroEmojis[hero.name] + ' ' + hero.level
     if (count > 0 && count % 7 === 0) {
-      heroLevels += '\n'
+      if (hero.level === hero.maxLevel) {
+        heroLevels +=  '*\n'
+      } else {
+        heroLevels +=  '\n'
+      }
     } else {
       if (hero.level === hero.maxLevel) {
         heroLevels +=  '*\u2002'
@@ -499,7 +586,16 @@ DiscordClient.on('message', message => {
 
       message.channel.send({embed}).then(debug).catch(log)
     } else if (splitMessage[0].toLowerCase() === prefix + 'help') {
-      message.channel.send('1. `' + prefix + 'announce #CLANTAG` Assign a clan to announce in a channel.\n2. `' + prefix + 'unannounce #CLANTAG` Stop a clan from announcing in a channel.\n3. `' + prefix + 'warstats #CLANTAG` Display war stats for a clan that is tracked by The Announcer. If not provided with a clan tag it will display war stats for all clans assigned to the channel the command was run in.\n4. `' + prefix + 'hitrate #CLANTAG` Display hit rate stats for a clan that is tracked by The Announcer. If not provided with a clan tag it will display hit rate stats for all clans assigned to the channel the command was run in.\n5. `' + prefix + 'playerstats #PLAYERTAG` Display player stats for any player tag provided.\n6. `' + prefix + 'info` Display bot information.').then(debug).catch(log)
+      let helpMessage = '1. `' + prefix + 'announce #CLANTAG` Assign a clan to announce in a channel.\n'
+      helpMessage += '2. `' + prefix + 'unannounce #CLANTAG` Stop a clan from announcing in a channel.\n'
+      helpMessage += '3. `' + prefix + 'warstats #CLANTAG` Display war stats for a clan that is tracked by The Announcer. If not provided with a clan tag it will display war stats for all clans assigned to the channel the command was run in.\n'
+      helpMessage += '4. `' + prefix + 'hitrate #CLANTAG` Display hit rate stats for a clan that is tracked by The Announcer. If not provided with a clan tag it will display hit rate stats for all clans assigned to the channel the command was run in.\n'
+      helpMessage += '5. `' + prefix + 'playerstats #PLAYERTAG` Display player stats for any player tag provided.\n'
+      helpMessage += '6. `' + prefix + 'style 1-6` Choose a style to use for war attacks in this channel.\n'
+      helpMessage += '7. `' + prefix + 'filter all,attacks,defenses,none` Not yet implemented'
+      // helpMessage += '7. `' + prefix + 'filter all,attacks,defenses,none` Filter which attacks show up in the channel.\n'
+      helpMessage += '8. `' + prefix + 'info` Display bot information.'
+      message.channel.send(helpMessage).then(debug).catch(log)
     } else if (splitMessage[0].toLowerCase() === prefix + 'announce') {
       if (message.member.hasPermission('MANAGE_CHANNELS')) {
         if (splitMessage[1]) {
@@ -659,6 +755,75 @@ DiscordClient.on('message', message => {
       } else {
         message.channel.send('Please provide a player tag to look up.\n```\n' + prefix + 'playerstats #playertag\n```').then(debug).catch(log)
       }
+    } else if (splitMessage[0].toLowerCase() === prefix + 'style') {
+      if (message.member.hasPermission('MANAGE_CHANNELS')) {
+        if (splitMessage[1]) {
+          let styleId = parseInt(splitMessage[1])
+          if (styleId > 0 && styleId < 7) {
+            channelSettingsSet(message.channel.id, 'style', styleId)
+            message.channel.send('This channel will now announce attacks with style #' + styleId).then(debug).catch(log)
+          } else {
+            message.channel.send('Invalid style id choose a number between 1-6').then(debug).catch(log)
+          }
+        } else {
+          message.channel.send('Please provide a style id to use for this channel.\n```\n' + prefix + 'style [1-5]\n```').then(debug).catch(log)
+        }
+      } else {
+        message.channel.send('Someone with the permissions to manage channels needs to run that command.').then(debug).catch(log)
+      }
+    } else if (splitMessage[0].toLowerCase() === prefix + 'styletest') {
+      let emojis = DiscordChannelEmojis
+      let text
+      let embed
+
+      message.channel.send('***Style #1***').then(debug).catch(log)
+      text = ''
+      text += DiscordTownHallEmojis[9] + ' Player Name ' + emojis.dwasword
+      text += emojis.dwastar.repeat(1) + emojis.dwastarnew.repeat(1) + emojis.dwastarempty.repeat(1) + ' ' + '75%'
+      text += emojis.dwashieldbroken + ' Opponent Name ' + DiscordTownHallEmojis[10]
+      message.channel.send(text).then(debug).catch(log)
+
+      message.channel.send('***Style #2***').then(debug).catch(log)
+      text = ''
+      text += 'Player Name [6] ' + DiscordTownHallEmojis[9] + ' ' + emojis.dwasword + '\uD83C\uDF43\uD83D\uDD3A'
+      text += emojis.dwastar.repeat(1) + emojis.dwastarnew.repeat(1) + emojis.dwastarempty.repeat(1) + ' ' + '75%'
+      text += emojis.dwashieldbroken + ' ' + DiscordTownHallEmojis[10] + ' [5] Opponent Name'
+      message.channel.send(text).then(debug).catch(log)
+
+      message.channel.send('***Style #3***').then(debug).catch(log)
+      embed = new Discord.RichEmbed()
+      .setColor(StarColors[2])
+      .addField('Player Name', emojis.dwasword + '\uD83C\uDF43\uD83D\uDD3A', true)
+      .addField(DiscordTownHallEmojis[9] + ' 6 vs 5 ' + DiscordTownHallEmojis[10], emojis.dwastar.repeat(1) + emojis.dwastarnew.repeat(1) + emojis.dwastarempty.repeat(1), true)
+      .addField('Opponent Name', emojis.dwashieldbroken + ' 75%', true)
+      message.channel.send({embed}).then(debug).catch(log)
+
+      message.channel.send('***Style #4***').then(debug).catch(log)
+      embed = new Discord.RichEmbed()
+      .setColor(StarColors[2])
+      .addField('Player Name', emojis.dwasword + '\uD83C\uDF43\uD83D\uDD3A\n#playerTag', true)
+      .addField(DiscordTownHallEmojis[9] + ' 6 vs 5 ' + DiscordTownHallEmojis[10], emojis.dwastar.repeat(1) + emojis.dwastarnew.repeat(1) + emojis.dwastarempty.repeat(1) + '\n\t\t' + '75%', true)
+      .addField('Opponent Name', emojis.dwashieldbroken + '\n#opponentTag', true)
+      message.channel.send({embed}).then(debug).catch(log)
+
+      message.channel.send('***Style #5***').then(debug).catch(log)
+      embed = new Discord.RichEmbed()
+      .setColor(StarColors[2])
+      .addField('Player Name', emojis.dwasword + '\uD83C\uDF43\uD83D\uDD3A\nClan Name', true)
+      .addField(DiscordTownHallEmojis[9] + ' 6 vs 5 ' + DiscordTownHallEmojis[10], emojis.dwastar.repeat(1) + emojis.dwastarnew.repeat(1) + emojis.dwastarempty.repeat(1) + '\n\t\t' + '75%', true)
+      .addField('Opponent Name', emojis.dwashieldbroken + '\nOpponent Clan Name', true)
+      message.channel.send({embed}).then(debug).catch(log)
+
+      message.channel.send('***Style #6 (default)***').then(debug).catch(log)
+      embed = new Discord.RichEmbed()
+      .setColor(StarColors[2])
+      .addField('Player Name', emojis.dwasword + '\uD83C\uDF43\uD83D\uDD3A\n#playerTag', true)
+      .addField(DiscordTownHallEmojis[9] + ' 6 vs 5 ' + DiscordTownHallEmojis[10], emojis.dwastar.repeat(1) + emojis.dwastarnew.repeat(1) + emojis.dwastarempty.repeat(1) + '\n\t\t' + '75%', true)
+      .addField('Opponent Name', emojis.dwashieldbroken + '\n#opponentTag', true)
+      .addField('Clan Name', '#clanTag', true)
+      .addField('\u200b', '\u200b', true)
+      .addField('Opponent Clan Name', '#opponentClanTag', true)
+      message.channel.send({embed}).then(debug).catch(log)
     }
   }
 })
