@@ -101,8 +101,7 @@ module.exports = class Clan {
           })
         }
       })
-
-      let TH9v9 = {
+      let defaultHitRate = {
         clan: {
           attempt: 0,
           success: 0
@@ -112,24 +111,13 @@ module.exports = class Clan {
           success: 0
         }
       }
-      let TH10v10 = {
-        clan: {
-          attempt: 0,
-          success: 0
-        },
-        opponent: {
-          attempt: 0,
-          success: 0
-        }
-      }
-      let TH10v11 = {
-        clan: {
-          attempt: 0,
-          success: 0
-        },
-        opponent: {
-          attempt: 0,
-          success: 0
+      let hitrate = {}
+      for (let th = 3; th <= 11; th++) {
+        hitrate['TH' + th + 'v' + th] = JSON.parse(JSON.stringify(defaultHitRate))
+        if (th === 10) {
+          hitrate['TH' + th + 'v' + (th+1)] = JSON.parse(JSON.stringify(defaultHitRate))
+        } else if (th === 11) {
+          hitrate['TH' + th + 'v' + (th-1)] = JSON.parse(JSON.stringify(defaultHitRate))
         }
       }
       Object.keys(tmpAttacks).forEach(k => {
@@ -143,44 +131,44 @@ module.exports = class Clan {
           opponentPlayer = Players[attack.attackerTag]
           clanPlayer = Players[attack.defenderTag]
         }
-        if (clanPlayer.townhallLevel === 9 && opponentPlayer.townhallLevel === 9) {
-          if (attack.who === 'clan') {
-            TH9v9.clan.attempt++
-          } else if (attack.who === 'opponent') {
-            TH9v9.opponent.attempt++
-          }
-          if (attack.stars === 3) {
+        for (let th = 1; th <= 11; th++) {
+          if (clanPlayer.townhallLevel === th && opponentPlayer.townhallLevel === th) {
             if (attack.who === 'clan') {
-              TH9v9.clan.success++
+              hitrate['TH' + th + 'v' + th].clan.attempt++
             } else if (attack.who === 'opponent') {
-              TH9v9.opponent.success++
-            }
-          }
-        } else if (clanPlayer.townhallLevel === 10) {
-          if (opponentPlayer.townhallLevel === 10) {
-            if (attack.who === 'clan') {
-              TH10v10.clan.attempt++
-            } else if (attack.who === 'opponent') {
-              TH10v10.opponent.attempt++
+              hitrate['TH' + th + 'v' + th].opponent.attempt++
             }
             if (attack.stars === 3) {
               if (attack.who === 'clan') {
-                TH10v10.clan.success++
+                hitrate['TH' + th + 'v' + th].clan.success++
               } else if (attack.who === 'opponent') {
-                TH10v10.opponent.success++
+                hitrate['TH' + th + 'v' + th].opponent.success++
               }
             }
-          } else if (opponentPlayer.townhallLevel === 11) {
-            if (attack.who === 'clan') {
-              TH10v11.clan.attempt++
-            } else if (attack.who === 'opponent') {
-              TH10v11.opponent.attempt++
+          }
+          if (th === 10) {
+            if (clanPlayer.townhallLevel === th && opponentPlayer.townhallLevel === th+1 && attack.who === 'clan') {
+              hitrate['TH' + th + 'v' + (th+1)].clan.attempt++
+              if (attack.stars >= 2) {
+                hitrate['TH' + th + 'v' + (th+1)].clan.success++
+              }
+            } else if (clanPlayer.townhallLevel === th+1 && opponentPlayer.townhallLevel === th && attack.who === 'opponent') {
+              hitrate['TH' + th + 'v' + (th+1)].opponent.attempt++
+              if (attack.stars >= 2) {
+                hitrate['TH' + th + 'v' + (th+1)].opponent.success++
+              }
             }
-            if (attack.stars >= 2) {
-              if (attack.who === 'clan') {
-                TH10v11.clan.success++
-              } else if (attack.who === 'opponent') {
-                TH10v11.opponent.success++
+          }
+          if (th === 11) {
+            if (clanPlayer.townhallLevel === th && opponentPlayer.townhallLevel === th-1 && attack.who === 'clan') {
+              hitrate['TH' + th + 'v' + (th-1)].clan.attempt++
+              if (attack.stars >= 2) {
+                hitrate['TH' + th + 'v' + (th-1)].clan.success++
+              }
+            } else if (clanPlayer.townhallLevel === th-1 && opponentPlayer.townhallLevel === th && attack.who === 'opponent') {
+              hitrate['TH' + th + 'v' + (th-1)].opponent.attempt++
+              if (attack.stars >= 2) {
+                hitrate['TH' + th + 'v' + (th-1)].opponent.success++
               }
             }
           }
@@ -191,11 +179,7 @@ module.exports = class Clan {
         state: data.state,
         endTime: data.endTime,
         startTime: data.startTime,
-        hitrate: {
-          TH9v9: TH9v9,
-          TH10v10: TH10v10,
-          TH10v11: TH10v11
-        },
+        hitrate: hitrate,
         clan: {
           tag: data.clan.tag,
           name: data.clan.name,

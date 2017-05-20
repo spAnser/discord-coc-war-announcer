@@ -244,32 +244,38 @@ global.discordHitrateMessage = (WarData, channelId) => {
     .setFooter(WarData.stats.clan.tag + ' vs ' + WarData.stats.opponent.tag)
     .setColor(0x007cff)
     
-    if (WarData.stats.hitrate.TH9v9.clan.attempt > 0 || WarData.stats.hitrate.TH9v9.opponent.attempt > 0) {
-      let clan9v9 = 'n/a'
-      if (WarData.stats.hitrate.TH9v9.clan.attempt > 0) clan9v9 = WarData.stats.hitrate.TH9v9.clan.success + '/' + WarData.stats.hitrate.TH9v9.clan.attempt + ' - ' + Math.round(WarData.stats.hitrate.TH9v9.clan.success / WarData.stats.hitrate.TH9v9.clan.attempt * 100, 2) + '%'
-      let opponent9v9 = 'n/a'
-      if (WarData.stats.hitrate.TH9v9.opponent.attempt > 0) opponent9v9 = WarData.stats.hitrate.TH9v9.opponent.success + '/' + WarData.stats.hitrate.TH9v9.opponent.attempt + ' - ' + Math.round(WarData.stats.hitrate.TH9v9.opponent.success / WarData.stats.hitrate.TH9v9.opponent.attempt * 100, 2) + '%'
-      embed.addField(DiscordTownHallEmojis[8] + ' vs ' + DiscordTownHallEmojis[8], clan9v9, true)
-      embed.addField(DiscordTownHallEmojis[8] + ' vs ' + DiscordTownHallEmojis[8], opponent9v9, true)
-      embed.addBlankField(true)
-    }
-    if (WarData.stats.hitrate.TH10v10.clan.attempt > 0 || WarData.stats.hitrate.TH10v10.opponent.attempt > 0) {
-      let clan10v10 = 'n/a'
-      if (WarData.stats.hitrate.TH10v10.clan.attempt > 0) clan10v10 = WarData.stats.hitrate.TH10v10.clan.success + '/' + WarData.stats.hitrate.TH10v10.clan.attempt + ' - ' + Math.round(WarData.stats.hitrate.TH10v10.clan.success / WarData.stats.hitrate.TH10v10.clan.attempt * 100, 2) + '%'
-      let opponent10v10 = 'n/a'
-      if (WarData.stats.hitrate.TH10v10.opponent.attempt > 0) opponent10v10 = WarData.stats.hitrate.TH10v10.opponent.success + '/' + WarData.stats.hitrate.TH10v10.opponent.attempt + ' - ' + Math.round(WarData.stats.hitrate.TH10v10.opponent.success / WarData.stats.hitrate.TH10v10.opponent.attempt * 100, 2) + '%'
-      embed.addField(DiscordTownHallEmojis[9] + ' vs ' + DiscordTownHallEmojis[9], clan10v10, true)
-      embed.addField(DiscordTownHallEmojis[9] + ' vs ' + DiscordTownHallEmojis[9], opponent10v10, true)
-      embed.addBlankField(true)
-    }
-    if (WarData.stats.hitrate.TH10v11.clan.attempt > 0 || WarData.stats.hitrate.TH10v11.opponent.attempt > 0) {
-      let clan10v11 = 'n/a'
-      if (WarData.stats.hitrate.TH10v11.clan.attempt > 0) clan10v11 = WarData.stats.hitrate.TH10v11.clan.success + '/' + WarData.stats.hitrate.TH10v11.clan.attempt + ' - ' + Math.round(WarData.stats.hitrate.TH10v11.clan.success / WarData.stats.hitrate.TH10v11.clan.attempt * 100, 2) + '%'
-      let opponent10v11 = 'n/a'
-      if (WarData.stats.hitrate.TH10v11.opponent.attempt > 0) opponent10v11 = WarData.stats.hitrate.TH10v11.opponent.success + '/' + WarData.stats.hitrate.TH10v11.opponent.attempt + ' - ' + Math.round(WarData.stats.hitrate.TH10v11.opponent.success / WarData.stats.hitrate.TH10v11.opponent.attempt * 100, 2) + '%'
-      embed.addField(DiscordTownHallEmojis[9] + ' vs ' + DiscordTownHallEmojis[10], clan10v11, true)
-      embed.addField(DiscordTownHallEmojis[9] + ' vs ' + DiscordTownHallEmojis[10], opponent10v11, true)
-      embed.addBlankField(true)
+    for (let th = 3; th <= 11; th++) {
+      if (WarData.stats.hitrate['TH' + th + 'v' + th].clan.attempt > 0 || WarData.stats.hitrate['TH' + th + 'v' + th].opponent.attempt > 0) {
+        let clanHitRate = 'n/a'
+        if (WarData.stats.hitrate['TH' + th + 'v' + th].clan.attempt > 0) clanHitRate = WarData.stats.hitrate['TH' + th + 'v' + th].clan.success + '/' + WarData.stats.hitrate['TH' + th + 'v' + th].clan.attempt + ' - ' + Math.round(WarData.stats.hitrate['TH' + th + 'v' + th].clan.success / WarData.stats.hitrate['TH' + th + 'v' + th].clan.attempt * 100, 2) + '%'
+        let opponentHitRate = 'n/a'
+        if (WarData.stats.hitrate['TH' + th + 'v' + th].opponent.attempt > 0) opponentHitRate = WarData.stats.hitrate['TH' + th + 'v' + th].opponent.success + '/' + WarData.stats.hitrate['TH' + th + 'v' + th].opponent.attempt + ' - ' + Math.round(WarData.stats.hitrate['TH' + th + 'v' + th].opponent.success / WarData.stats.hitrate['TH' + th + 'v' + th].opponent.attempt * 100, 2) + '%'
+        embed.addField(DiscordTownHallEmojis[th-1] + ' vs ' + DiscordTownHallEmojis[th-1], clanHitRate, true)
+        embed.addField(DiscordTownHallEmojis[th-1] + ' vs ' + DiscordTownHallEmojis[th-1], opponentHitRate, true)
+        embed.addBlankField(true)
+      }
+      if (th === 10) {
+        if (WarData.stats.hitrate['TH' + th + 'v' + (th+1)].clan.attempt > 0 || WarData.stats.hitrate['TH' + th + 'v' + (th+1)].opponent.attempt > 0) {
+          let clanHitRate = 'n/a'
+          if (WarData.stats.hitrate['TH' + th + 'v' + (th+1)].clan.attempt > 0) clanHitRate = WarData.stats.hitrate['TH' + th + 'v' + (th+1)].clan.success + '/' + WarData.stats.hitrate['TH' + th + 'v' + (th+1)].clan.attempt + ' - ' + Math.round(WarData.stats.hitrate['TH' + th + 'v' + (th+1)].clan.success / WarData.stats.hitrate['TH' + th + 'v' + (th+1)].clan.attempt * 100, 2) + '%'
+          let opponentHitRate = 'n/a'
+          if (WarData.stats.hitrate['TH' + th + 'v' + (th+1)].opponent.attempt > 0) opponentHitRate = WarData.stats.hitrate['TH' + th + 'v' + (th+1)].opponent.success + '/' + WarData.stats.hitrate['TH' + th + 'v' + (th+1)].opponent.attempt + ' - ' + Math.round(WarData.stats.hitrate['TH' + th + 'v' + (th+1)].opponent.success / WarData.stats.hitrate['TH' + th + 'v' + (th+1)].opponent.attempt * 100, 2) + '%'
+          embed.addField(DiscordTownHallEmojis[th-1] + ' vs ' + DiscordTownHallEmojis[th], clanHitRate, true)
+          embed.addField(DiscordTownHallEmojis[th-1] + ' vs ' + DiscordTownHallEmojis[th], opponentHitRate, true)
+          embed.addBlankField(true)
+        }
+      }
+      if (th === 11) {
+        if (WarData.stats.hitrate['TH' + th + 'v' + (th-1)].clan.attempt > 0 || WarData.stats.hitrate['TH' + th + 'v' + (th-1)].opponent.attempt > 0) {
+          let clanHitRate = 'n/a'
+          if (WarData.stats.hitrate['TH' + th + 'v' + (th-1)].clan.attempt > 0) clanHitRate = WarData.stats.hitrate['TH' + th + 'v' + (th-1)].clan.success + '/' + WarData.stats.hitrate['TH' + th + 'v' + (th-1)].clan.attempt + ' - ' + Math.round(WarData.stats.hitrate['TH' + th + 'v' + (th-1)].clan.success / WarData.stats.hitrate['TH' + th + 'v' + (th-1)].clan.attempt * 100, 2) + '%'
+          let opponentHitRate = 'n/a'
+          if (WarData.stats.hitrate['TH' + th + 'v' + (th-1)].opponent.attempt > 0) opponentHitRate = WarData.stats.hitrate['TH' + th + 'v' + (th-1)].opponent.success + '/' + WarData.stats.hitrate['TH' + th + 'v' + (th-1)].opponent.attempt + ' - ' + Math.round(WarData.stats.hitrate['TH' + th + 'v' + (th-1)].opponent.success / WarData.stats.hitrate['TH' + th + 'v' + (th-1)].opponent.attempt * 100, 2) + '%'
+          embed.addField(DiscordTownHallEmojis[th-1] + ' vs ' + DiscordTownHallEmojis[th-2], clanHitRate, true)
+          embed.addField(DiscordTownHallEmojis[th-1] + ' vs ' + DiscordTownHallEmojis[th-2], opponentHitRate, true)
+          embed.addBlankField(true)
+        }
+      }
     }
     embed.addField(WarData.stats.clan.name + ' vs ' + WarData.stats.opponent.name, '\u200b')
 
