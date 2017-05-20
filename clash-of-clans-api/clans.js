@@ -58,7 +58,7 @@ module.exports = class Clan {
   }
 
   parseCurrentWar(data) {
-    if (data && data.reason != 'accessDenied' && data.state != 'notInWar') {
+    if (data && !data.reason && data.state != 'notInWar') {
       let sha1 = crypto.createHash('sha1')
       let opponentTag = data.opponent.tag
       sha1.update(this.tag + opponentTag + data.preparationStartTime)
