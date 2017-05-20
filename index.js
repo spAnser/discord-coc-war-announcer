@@ -121,6 +121,8 @@ global.DiscordHeroEmojis = {
 global.Clans = {}
 global.Players = {}
 
+const StarColors = config.starColors
+
 global.Storage = nodePersist.create()
 Storage.initSync()
 
@@ -128,8 +130,6 @@ global.AnnounceClans = Storage.getItemSync('AnnounceClans')
 AnnounceClans = cleanArray(AnnounceClans)
 if (!AnnounceClans) AnnounceClans = []
 Storage.setItemSync('AnnounceClans', AnnounceClans)
-
-const StarColors = config.starColors
 
 global.announcingClan = (clanTag) => {
   let count = 0
