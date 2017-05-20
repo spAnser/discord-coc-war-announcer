@@ -162,12 +162,12 @@ module.exports = class Clan {
           if (th === 11) {
             if (clanPlayer.townhallLevel === th && opponentPlayer.townhallLevel === th-1 && attack.who === 'clan') {
               hitrate['TH' + th + 'v' + (th-1)].clan.attempt++
-              if (attack.stars >= 2) {
+              if (attack.stars === 3) {
                 hitrate['TH' + th + 'v' + (th-1)].clan.success++
               }
             } else if (clanPlayer.townhallLevel === th-1 && opponentPlayer.townhallLevel === th && attack.who === 'opponent') {
               hitrate['TH' + th + 'v' + (th-1)].opponent.attempt++
-              if (attack.stars >= 2) {
+              if (attack.stars === 3) {
                 hitrate['TH' + th + 'v' + (th-1)].opponent.success++
               }
             }
