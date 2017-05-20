@@ -566,7 +566,7 @@ let discordReady = () => {
 
 DiscordClient.on('message', message => {
   let messageContent = message.content.trim()
-  let prefix = config.commandPrefix
+  let prefix = config.commandPrefix || '!'
   if (messageContent.slice(0, 1) === prefix) {
     let channelId = message.channel.id
     let splitMessage = messageContent.split(' ')
