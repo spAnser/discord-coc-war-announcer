@@ -335,11 +335,11 @@ let playerReport = (channel, data) => {
   debug(data)
 
   let embed = new Discord.RichEmbed()
-  .setAuthor(data.name + ' ' + data.tag, data.league.iconUrls.small)
+  .setAuthor(data.name + ' ' + data.tag, (data.league) ? data.league.iconUrls.small : '\u2002')
   .setFooter(data.role + ' of ' + data.clan.name + ' ' + data.clan.tag, data.clan.badgeUrls.small)
   .setThumbnail('https://coc.guide/static/imgs/other/town-hall-' + data.townHallLevel + '.png')
 
-  embed.addField('League', data.league.name, true)
+  embed.addField('League', (data.league) ? data.league.name : 'n/a', true)
   embed.addField('Trophies', data.trophies , true)
   embed.addField('War Stars', data.warStars , true)
   embed.addField('Best Trophies', data.bestTrophies, true)
