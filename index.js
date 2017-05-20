@@ -657,7 +657,7 @@ DiscordClient.on('message', message => {
           }
         })
       } else {
-        message.channel.send('Please provide a player tag to look up.\n```\n!playerstats #playertag\n```').then(debug).catch(log)
+        message.channel.send('Please provide a player tag to look up.\n```\n' + prefix + 'playerstats #playertag\n```').then(debug).catch(log)
       }
     }
   }
