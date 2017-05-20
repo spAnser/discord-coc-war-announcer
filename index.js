@@ -426,7 +426,6 @@ let playerReport = (channel, data) => {
   embed.addField('Trophies', data.trophies , true)
   embed.addField('War Stars', data.warStars , true)
   embed.addField('Best Trophies', data.bestTrophies, true)
-  console.log(embed)
 
   let troopLevels = ''
   let count = 0
