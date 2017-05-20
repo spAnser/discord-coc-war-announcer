@@ -126,8 +126,8 @@ Storage.initSync()
 
 global.AnnounceClans = Storage.getItemSync('AnnounceClans')
 AnnounceClans = cleanArray(AnnounceClans)
-Storage.setItemSync('AnnounceClans', AnnounceClans)
 if (!AnnounceClans) AnnounceClans = []
+Storage.setItemSync('AnnounceClans', AnnounceClans)
 
 const StarColors = config.starColors
 
