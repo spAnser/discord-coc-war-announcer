@@ -592,7 +592,7 @@ DiscordClient.on('message', message => {
       helpMessage += '4. `' + prefix + 'hitrate #CLANTAG` Display hit rate stats for a clan that is tracked by The Announcer. If not provided with a clan tag it will display hit rate stats for all clans assigned to the channel the command was run in.\n'
       helpMessage += '5. `' + prefix + 'playerstats #PLAYERTAG` Display player stats for any player tag provided.\n'
       helpMessage += '6. `' + prefix + 'style 1-6` Choose a style to use for war attacks in this channel.\n'
-      helpMessage += '7. `' + prefix + 'filter all,attacks,defenses,none` Not yet implemented'
+      helpMessage += '7. `' + prefix + 'filter all,attacks,defenses,none` Not yet implemented\n'
       // helpMessage += '7. `' + prefix + 'filter all,attacks,defenses,none` Filter which attacks show up in the channel.\n'
       helpMessage += '8. `' + prefix + 'info` Display bot information.'
       message.channel.send(helpMessage).then(debug).catch(log)
@@ -755,6 +755,8 @@ DiscordClient.on('message', message => {
       } else {
         message.channel.send('Please provide a player tag to look up.\n```\n' + prefix + 'playerstats #playertag\n```').then(debug).catch(log)
       }
+    } else if (splitMessage[0].toLowerCase() === prefix + 'filter') {
+      message.channel.send('This command is not yet implemented.')
     } else if (splitMessage[0].toLowerCase() === prefix + 'style') {
       if (message.member.hasPermission('MANAGE_CHANNELS')) {
         if (splitMessage[1]) {
