@@ -300,7 +300,7 @@ module.exports = class Clan {
           })
         })
         log(chalk.red.bold(this.tag.toUpperCase().replace(/O/g, '0') + ' War Log is not public'))
-      } else {
+      } else if (data.reason != 'accessDenied') {
         AnnounceClans[announcingIndex].notPublicReported = undefined
       }
 
