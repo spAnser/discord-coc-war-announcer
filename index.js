@@ -289,8 +289,10 @@ global.discordAttackMessage = (warId, WarData, clanTag, opponentTag, attackData,
     .addField(DiscordTownHallEmojis[clanPlayer.townhallLevel - 1] + ' ' + clanPlayer.mapPosition + ' vs ' + opponentPlayer.mapPosition + ' ' + DiscordTownHallEmojis[opponentPlayer.townhallLevel - 1], messageStars + '\n\t\t' + attackData.destructionPercentage + '%', true)
     .addField(opponentPlayer.name, (attackData.who === 'clan') ? defendMessage : attackMessage, true)
   } else if (style === 5) {
-    attackMessage += '\n' + (attackData.who === 'clan') ? WarData.stats.clan.name : WarData.stats.opponent.name
-    defendMessage += '\n' + (attackData.who === 'clan') ? WarData.stats.opponent.name : WarData.stats.clan.name
+    attackMessage += '\n'
+    defendMessage += '\n'
+    attackMessage += (attackData.who === 'clan') ? WarData.stats.clan.name : WarData.stats.opponent.name
+    defendMessage += (attackData.who === 'clan') ? WarData.stats.opponent.name : WarData.stats.clan.name
     embed = new Discord.RichEmbed()
     .setColor(StarColors[attackData.stars])
     .addField(clanPlayer.name, (attackData.who === 'clan') ? attackMessage : defendMessage, true)
