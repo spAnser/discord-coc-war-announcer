@@ -266,14 +266,14 @@ global.discordAttackMessage = (warId, WarData, clanTag, opponentTag, attackData,
   // \u200e = LEFT-TO-RIGHT MARK
   if (style === 1) {
     text = ''
-    text += DiscordTownHallEmojis[clanPlayer.townhallLevel - 1] + ' ' + clanPlayer.name + '\u200e ' + emojis.dwasword
+    text += DiscordTownHallEmojis[clanPlayer.townhallLevel - 1] + ' ' + clanPlayer.name + '\u200e ' + ((attackData.who === 'clan') ? attackMessage : defendMessage)
     text += messageStars + ' ' + attackData.destructionPercentage + '%'
-    text += emojis.dwashieldbroken + ' ' + opponentPlayer.name + '\u200e ' + DiscordTownHallEmojis[opponentPlayer.townhallLevel - 1]
+    text += ((attackData.who === 'clan') ? defendMessage : attackMessage) + ' ' + opponentPlayer.name + '\u200e ' + DiscordTownHallEmojis[opponentPlayer.townhallLevel - 1]
   } else if (style === 2) {
     text = ''
-    text += clanPlayer.name + '\u200e [' + clanPlayer.mapPosition + '] ' + DiscordTownHallEmojis[clanPlayer.townhallLevel - 1] + ' ' + attackMessage
+    text += clanPlayer.name + '\u200e [' + clanPlayer.mapPosition + '] ' + DiscordTownHallEmojis[clanPlayer.townhallLevel - 1] + ' ' + ((attackData.who === 'clan') ? attackMessage : defendMessage)
     text += messageStars + ' ' + attackData.destructionPercentage + '%'
-    text += emojis.dwashieldbroken + ' ' + DiscordTownHallEmojis[opponentPlayer.townhallLevel - 1] + ' [' + opponentPlayer.mapPosition + '] ' + opponentPlayer.name
+    text += ((attackData.who === 'clan') ? defendMessage : attackMessage) + ' ' + DiscordTownHallEmojis[opponentPlayer.townhallLevel - 1] + ' [' + opponentPlayer.mapPosition + '] ' + opponentPlayer.name
   } else if (style === 3) {
     embed = new Discord.RichEmbed()
     .setColor(StarColors[attackData.stars])
