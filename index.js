@@ -58,26 +58,43 @@ const DiscordClient = new Discord.Client()
 const COC_API_BASE = 'https://api.clashofclans.com/v1'
 
 global.DiscordChannelEmojis = {
-  'dwashield': '<:dwashield:306956561266507786>',
-  'dwashieldbroken': '<:dwashieldbroken:306956561073438720>',
-  'dwasword': '<:dwasword:306956560695951362>',
-  'dwaswordbroken': '<:dwaswordbroken:306956561073307648>',
-  'dwastarempty': '<:dwastarempty:306956560779706370>',
-  'dwastar': '<:dwastar:306956561056530442>',
-  'dwastarnew': '<:dwastarnew:306956560855465995>',
+  'dwashield': '<:dwashield:316692730145275912>',
+  'dwashieldbroken': '<:dwashieldbroken:316692730191544321>',
+  'dwasword': '<:dwasword:316692748512133121>',
+  'dwaswordbroken': '<:dwaswordbroken:316692748675842048>',
+  'dwastarempty': '<:dwastarempty:316692653368410113>',
+  'dwastar': '<:dwastar:316692664919654400>',
+  'dwastarnew': '<:dwastarnew:316692675610935298>',
+  'elixir': '<:elixir:316692765817700352>',
+  'darkelixir': '<:darkelixir:316692780955074561>',
+  'gold': '<:gold:316692765473767425>',
+  'squaregold': '<:squaregold:316692808562114561>',
+  'diamondelixir': '<:diamondelixir:316692823854415872>',
+  'gems': '<:gems:316692795035484163>',
+  'versustrophies': '<:versustrophies:316692846411513856>',
 }
 global.DiscordTownHallEmojis = [
-  '<:townhall1:307293097405054976>',
-  '<:townhall2:307293097748987904>',
-  '<:townhall3:307293098260824085>',
-  '<:townhall4:307293098495442945>',
-  '<:townhall5:307293098592174083>',
-  '<:townhall6:307293098797563906>',
-  '<:townhall7:307293099028119552>',
-  '<:townhall8:307293099145822208>',
-  '<:townhall9:307293099162599424>',
-  '<:townhall10:307293099808260096>',
-  '<:townhall11:307293099174920192>',
+  '<:townhall1:316693150603149312>',
+  '<:townhall2:316693150645354496>',
+  '<:townhall3:316693150783504404>',
+  '<:townhall4:316693150922178562>',
+  '<:townhall5:316693176280678400>',
+  '<:townhall6:316693232480288768>',
+  '<:townhall7:316693232643997696>',
+  '<:townhall8:316693232849256449>',
+  '<:townhall9:316693282119876609>',
+  '<:townhall10:316693308271493120>',
+  '<:townhall11:316693320237580300>',
+]
+global.DiscordBuilderHallEmojis = [
+  '<:builderhall1:316693013718106123>',
+  '<:builderhall2:316693057988853760>',
+  '<:builderhall3:316693072022994944>',
+  '<:builderhall4:316693083754463232>',
+  '<:builderhall5:316693095448182784>',
+  '<:builderhall6:316693106651168769>',
+  '<:builderhall7:316693118269390848>',
+  '<:builderhall8:316693131770724353>',
 ]
 global.DiscordTroopEmojis = {
   'Barbarian': '<:barbarian:316393732671012864>',
@@ -126,7 +143,7 @@ global.DiscordHeroEmojis = {
   'Barbarian King': '<:barbarianking:316393776765468674>',
   'Archer Queen': '<:archerqueen:316393777075978251>',
   'Grand Warden': '<:grandwarden:316393831660781569>',
-  'Warmachine': '<:warmachine:316393831820165122>',
+  'Battle Machine': '<:warmachine:316393831820165122>',
 }
 
 global.Clans = {}
@@ -205,7 +222,7 @@ global.channelSettingsSet = (channelId, option, value) => {
       channel[option] = value
     }
   })
-  console.log(ChannelSettings)
+  // console.log(ChannelSettings)
   ChannelSettings = cleanArray(ChannelSettings)
   Storage.setItemSync('ChannelSettings', ChannelSettings)
 }
@@ -443,65 +460,146 @@ let playerReport = (channel, data) => {
   let troopLevels = ''
   let count = 0
   data.troops.forEach(troop => {
-    troopLevels += DiscordTroopEmojis[troop.name] + ' ' + troop.level
-    if (count > 0 && count % 7 === 0) {
-      if (troop.level === troop.maxLevel) {
-        troopLevels += '*\n'
+    if (troop.village === 'home') {
+      troopLevels += DiscordTroopEmojis[troop.name] + ' ' + troop.level
+      if (count > 0 && count % 7 === 0) {
+        if (troop.level === troop.maxLevel) {
+          troopLevels += '*\n'
+        } else {
+          troopLevels += '\n'
+        }
       } else {
-        troopLevels += '\n'
+        if (troop.level === troop.maxLevel) {
+          troopLevels += '*\u2002'
+        } else {
+          troopLevels += '\u2002\u2002'
+        }
       }
-    } else {
-      if (troop.level === troop.maxLevel) {
-        troopLevels += '*\u2002'
-      } else {
-        troopLevels += '\u2002\u2002'
-      }
+      count++
     }
-    count++
   })
   if (troopLevels) embed.addField('Troop Levels', troopLevels.slice(0, troopLevels.length - 2))
 
   let spellLevels = ''
   count = 0
   data.spells.forEach(spell => {
-    spellLevels += DiscordSpellEmojis[spell.name] + ' ' + spell.level
-    if (count > 0 && count % 7 === 0) {
-      if (spell.level === spell.maxLevel) {
-        spellLevels += '*\n'
+    if (spell.village === 'home') {
+      spellLevels += DiscordSpellEmojis[spell.name] + ' ' + spell.level
+      if (count > 0 && count % 7 === 0) {
+        if (spell.level === spell.maxLevel) {
+          spellLevels += '*\n'
+        } else {
+          spellLevels += '\n'
+        }
       } else {
-        spellLevels += '\n'
+        if (spell.level === spell.maxLevel) {
+          spellLevels +=  '*\u2002'
+        } else {
+          spellLevels +=  '\u2002\u2002'
+        }
       }
-    } else {
-      if (spell.level === spell.maxLevel) {
-        spellLevels +=  '*\u2002'
-      } else {
-        spellLevels +=  '\u2002\u2002'
-      }
+      count++
     }
-    count++
   })
   if (spellLevels) embed.addField('Spell Levels', spellLevels.slice(0, spellLevels.length - 2))
 
   let heroLevels = ''
   count = 0
   data.heroes.forEach(hero => {
-    heroLevels += DiscordHeroEmojis[hero.name] + ' ' + hero.level
-    if (count > 0 && count % 7 === 0) {
-      if (hero.level === hero.maxLevel) {
-        heroLevels +=  '*\n'
+    if (hero.village === 'home') {
+      heroLevels += DiscordHeroEmojis[hero.name] + ' ' + hero.level
+      if (count > 0 && count % 7 === 0) {
+        if (hero.level === hero.maxLevel) {
+          heroLevels +=  '*\n'
+        } else {
+          heroLevels +=  '\n'
+        }
       } else {
-        heroLevels +=  '\n'
+        if (hero.level === hero.maxLevel) {
+          heroLevels +=  '*\u2002'
+        } else {
+          heroLevels +=  '\u2002\u2002'
+        }
       }
-    } else {
-      if (hero.level === hero.maxLevel) {
-        heroLevels +=  '*\u2002'
-      } else {
-        heroLevels +=  '\u2002\u2002'
-      }
+      count++
     }
-    count++
   })
   if (heroLevels) embed.addField('Hero Levels', heroLevels.slice(0, heroLevels.length - 2))
+  
+  if (data.builderHallLevel) {
+    embed.addField('Builder Hall Level', DiscordBuilderHallEmojis[data.builderHallLevel - 1] + ' ' + data.builderHallLevel, true)
+    embed.addField('Versus Trophies', data.versusTrophies , true)
+    embed.addField('Versus Battle Wins', data.versusBattleWins , true)
+    embed.addField('Best Versus Trophies', data.bestVersusTrophies , true)
+    let troopLevels = ''
+    let count = 0
+    data.troops.forEach(troop => {
+      if (troop.village === 'builderBase') {
+        troopLevels += DiscordTroopEmojis[troop.name] + ' ' + troop.level
+        if (count > 0 && count % 7 === 0) {
+          if (troop.level === troop.maxLevel) {
+            troopLevels += '*\n'
+          } else {
+            troopLevels += '\n'
+          }
+        } else {
+          if (troop.level === troop.maxLevel) {
+            troopLevels += '*\u2002'
+          } else {
+            troopLevels += '\u2002\u2002'
+          }
+        }
+        count++
+      }
+    })
+    if (troopLevels) embed.addField('Troop Levels', troopLevels.slice(0, troopLevels.length - 2))
+
+    let spellLevels = ''
+    count = 0
+    data.spells.forEach(spell => {
+      if (spell.village === 'builderBase') {
+        spellLevels += DiscordSpellEmojis[spell.name] + ' ' + spell.level
+        if (count > 0 && count % 7 === 0) {
+          if (spell.level === spell.maxLevel) {
+            spellLevels += '*\n'
+          } else {
+            spellLevels += '\n'
+          }
+        } else {
+          if (spell.level === spell.maxLevel) {
+            spellLevels +=  '*\u2002'
+          } else {
+            spellLevels +=  '\u2002\u2002'
+          }
+        }
+        count++
+      }
+    })
+    if (spellLevels) embed.addField('Spell Levels', spellLevels.slice(0, spellLevels.length - 2))
+
+    let heroLevels = ''
+    count = 0
+    data.heroes.forEach(hero => {
+      if (hero.village === 'builderBase') {
+        heroLevels += DiscordHeroEmojis[hero.name] + ' ' + hero.level
+        if (count > 0 && count % 7 === 0) {
+          if (hero.level === hero.maxLevel) {
+            heroLevels +=  '*\n'
+          } else {
+            heroLevels +=  '\n'
+          }
+        } else {
+          if (hero.level === hero.maxLevel) {
+            heroLevels +=  '*\u2002'
+          } else {
+            heroLevels +=  '\u2002\u2002'
+          }
+        }
+        count++
+      }
+    })
+    if (heroLevels) embed.addField('Hero Levels', heroLevels.slice(0, heroLevels.length - 2))
+  }
 
   channel.send({embed}).then(debug).catch(log)
 }
