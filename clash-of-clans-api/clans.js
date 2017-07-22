@@ -114,7 +114,9 @@ module.exports = class Clan {
       let hitrate = {}
       for (let th = 3; th <= 11; th++) {
         hitrate['TH' + th + 'v' + th] = JSON.parse(JSON.stringify(defaultHitRate))
-        if (th === 10) {
+        if (th === 9) {
+          hitrate['TH' + th + 'v' + (th+1)] = JSON.parse(JSON.stringify(defaultHitRate))
+        } else if (th === 10) {
           hitrate['TH' + th + 'v' + (th+1)] = JSON.parse(JSON.stringify(defaultHitRate))
         } else if (th === 11) {
           hitrate['TH' + th + 'v' + (th-1)] = JSON.parse(JSON.stringify(defaultHitRate))

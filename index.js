@@ -254,7 +254,11 @@ global.discordAttackMessage = (warId, WarData, clanTag, opponentTag, attackData,
   debug(clanTag)
   debug(attackData)
   let style = channelSettingsGet(channelId, 'style')
+  let styleStars = channelSettingsGet(channelId, 'styleStars')
+  let filter = channelSettingsGet(channelId, 'filter')
   if (!style) style = 6
+  if (!styleStars) styleStars = false
+  if (!filter) filter = 'all'
   let emojis = DiscordChannelEmojis
   let clanPlayer
   let opponentPlayer
@@ -276,6 +280,9 @@ global.discordAttackMessage = (warId, WarData, clanTag, opponentTag, attackData,
       attackDir = 'up'
     }
   } else {
+    return
+  }
+  if ((filter === 'attacks' && attackData.who === 'opponent') || (filter === 'defenses' && attackData.who === 'clan') || (filter === 'none')) {
     return
   }
   let attackMessage = (attackData.stars > 0) ? emojis.dwasword : emojis.dwaswordbroken
@@ -338,6 +345,17 @@ global.discordAttackMessage = (warId, WarData, clanTag, opponentTag, attackData,
     .addField('\u200b', '\u200b', true)
     .addField(WarData.stats.opponent.name, WarData.stats.opponent.tag, true)
   }
+  if (styleStars && style > 2) {
+    embed
+    .addField(WarData.stats.clan.attacks + '/' + WarData.stats.clan.memberCount * 2 + ' ' + emojis.dwasword, WarData.stats.clan.destructionPercentage + '%', true)
+    .addField(WarData.stats.clan.memberCount + ' v ' + WarData.stats.opponent.memberCount, WarData.stats.clan.stars + ' ' + emojis.dwastarnew + ' vs ' + emojis.dwastarnew + ' ' + WarData.stats.opponent.stars, true)
+    .addField(WarData.stats.opponent.attacks + '/' + WarData.stats.opponent.memberCount * 2 + ' ' + emojis.dwasword, WarData.stats.opponent.destructionPercentage + '%', true)
+  } else if (styleStars) {
+    text += '\n'
+    text += WarData.stats.clan.destructionPercentage + '% '
+    text += WarData.stats.clan.stars + ' ' + emojis.dwastarnew + ' vs ' + emojis.dwastarnew + ' ' + WarData.stats.opponent.stars
+    text += WarData.stats.opponent.destructionPercentage + '%'
+  }
 
   WarData.lastReportedAttack = attackData.order
   ClanStorage.setItemSync(warId, WarData)
@@ -365,6 +383,17 @@ global.discordHitrateMessage = (WarData, channelId) => {
         embed.addField(DiscordTownHallEmojis[th-1] + ' vs ' + DiscordTownHallEmojis[th-1], clanHitRate, true)
         embed.addField(DiscordTownHallEmojis[th-1] + ' vs ' + DiscordTownHallEmojis[th-1], opponentHitRate, true)
         embed.addBlankField(true)
+      }
+      if (th === 9) {
+        if (WarData.stats.hitrate['TH' + th + 'v' + (th+1)].clan.attempt > 0 || WarData.stats.hitrate['TH' + th + 'v' + (th+1)].opponent.attempt > 0) {
+          let clanHitRate = 'n/a'
+          if (WarData.stats.hitrate['TH' + th + 'v' + (th+1)].clan.attempt > 0) clanHitRate = WarData.stats.hitrate['TH' + th + 'v' + (th+1)].clan.success + '/' + WarData.stats.hitrate['TH' + th + 'v' + (th+1)].clan.attempt + ' - ' + Math.round(WarData.stats.hitrate['TH' + th + 'v' + (th+1)].clan.success / WarData.stats.hitrate['TH' + th + 'v' + (th+1)].clan.attempt * 100, 2) + '%'
+          let opponentHitRate = 'n/a'
+          if (WarData.stats.hitrate['TH' + th + 'v' + (th+1)].opponent.attempt > 0) opponentHitRate = WarData.stats.hitrate['TH' + th + 'v' + (th+1)].opponent.success + '/' + WarData.stats.hitrate['TH' + th + 'v' + (th+1)].opponent.attempt + ' - ' + Math.round(WarData.stats.hitrate['TH' + th + 'v' + (th+1)].opponent.success / WarData.stats.hitrate['TH' + th + 'v' + (th+1)].opponent.attempt * 100, 2) + '%'
+          embed.addField(DiscordTownHallEmojis[th-1] + ' vs ' + DiscordTownHallEmojis[th], clanHitRate, true)
+          embed.addField(DiscordTownHallEmojis[th-1] + ' vs ' + DiscordTownHallEmojis[th], opponentHitRate, true)
+          embed.addBlankField(true)
+        }
       }
       if (th === 10) {
         if (WarData.stats.hitrate['TH' + th + 'v' + (th+1)].clan.attempt > 0 || WarData.stats.hitrate['TH' + th + 'v' + (th+1)].opponent.attempt > 0) {
@@ -434,6 +463,7 @@ global.discordReportMessage = (warId, WarData, clanTag, message, channelId) => {
   // log(Clans[clanTag])
   const embed = new Discord.RichEmbed()
   .setTitle(Clans[clanTag].name + ' vs ' + Clans[clanTag].opponent.name)
+  .setFooter(clanTag + ' vs ' + Clans[clanTag].opponent.tag)
   .setColor(message.color)
   .addField(message.title, message.body)
 
@@ -441,6 +471,16 @@ global.discordReportMessage = (warId, WarData, clanTag, message, channelId) => {
   getChannelById(channelId, discordChannel => {
     if (discordChannel) discordChannel.send({embed}).then(debug).catch(log)
   })
+}
+
+global.getAnnouncingChannels = () => {
+  let channelIds = []
+  AnnounceClans.forEach(clan => {
+    clan.channels.forEach(channelId => {
+      if (channelIds.indexOf(channelId) < 0) channelIds.push(channelId)
+    })
+  })
+  return channelIds
 }
 
 let playerReport = (channel, data) => {
@@ -686,7 +726,7 @@ DiscordClient.on('message', message => {
       const embed = new Discord.RichEmbed()
       .setFooter('Announcing wars since April 29th 2017 (' + moment('2017-04-29').fromNow() + ')')
       .setColor(0x007cff)
-      .addField('Instance Owned By', config.owner, true)
+      .addField('Instance Owned By', '<@' + config.owner + '>', true)
       .addField('Node Version', '[' + process.version + '](https://nodejs.org)', true)
       .addField('Discord.JS Version', '[' + Discord.version + '](https://github.com/hydrabolt/discord.js)', true)
       .addField('Tracking Stats', 'Announcing stats for ' + announcerStats.clanCount + ' clan' + ((announcerStats.clanCount != 1) ? 's' : '') + ' across ' + announcerStats.channelCount + ' channel' + ((announcerStats.channelCount != 1) ? 's' : ''))
@@ -702,7 +742,7 @@ DiscordClient.on('message', message => {
       helpMessage += '3. `' + prefix + 'warstats #CLANTAG` Display war stats for a clan that is tracked by The Announcer. If not provided with a clan tag it will display war stats for all clans assigned to the channel the command was run in.\n'
       helpMessage += '4. `' + prefix + 'hitrate #CLANTAG` Display hit rate stats for a clan that is tracked by The Announcer. If not provided with a clan tag it will display hit rate stats for all clans assigned to the channel the command was run in.\n'
       helpMessage += '5. `' + prefix + 'playerstats #PLAYERTAG` Display player stats for any player tag provided.\n'
-      helpMessage += '6. `' + prefix + 'style 1-6` Choose a style to use for war attacks in this channel.\n'
+      helpMessage += '6. `' + prefix + 'style [1-6](+)` Choose a style to use for war attacks in this channel. Requires a number to select style type, optionally append a `+` if you want war stats included in every message.\n'
       helpMessage += '7. `' + prefix + 'filter all,attacks,defenses,none` Not yet implemented\n'
       // helpMessage += '7. `' + prefix + 'filter all,attacks,defenses,none` Filter which attacks show up in the channel.\n'
       helpMessage += '8. `' + prefix + 'info` Display bot information.'
@@ -867,19 +907,35 @@ DiscordClient.on('message', message => {
         message.channel.send('Please provide a player tag to look up.\n```\n' + prefix + 'playerstats #playertag\n```').then(debug).catch(log)
       }
     } else if (splitMessage[0].toLowerCase() === prefix + 'filter') {
-      message.channel.send('This command is not yet implemented.')
+      if (splitMessage[1] && (splitMessage[1].toLowerCase() === 'all' || splitMessage[1].toLowerCase() === 'attacks' || splitMessage[1].toLowerCase() === 'defenses' || splitMessage[1].toLowerCase() === 'none')) {
+        channelSettingsSet(message.channel.id, 'filter', splitMessage[1].toLowerCase())
+        if (splitMessage[1].toLowerCase() === 'all') {
+          message.channel.send('Announcer will now announce everything.')
+        } else if (splitMessage[1].toLowerCase() === 'attacks') {
+          message.channel.send('Announcer will now announce attacks only.')
+        } else if (splitMessage[1].toLowerCase() === 'defenses') {
+          message.channel.send('Announcer will now announce defenses only.')
+        } else if (splitMessage[1].toLowerCase() === 'none') {
+          message.channel.send('Announcer will now announce nothing.')
+        }
+      } else {
+        message.channel.send('Please choose a valid filter method `all, attacks, defenses, none`.')
+      }
     } else if (splitMessage[0].toLowerCase() === prefix + 'style') {
       if (message.member.hasPermission('MANAGE_CHANNELS')) {
         if (splitMessage[1]) {
+          let showStars = (splitMessage[1].indexOf('+') == 1)
           let styleId = parseInt(splitMessage[1])
           if (styleId > 0 && styleId < 7) {
             channelSettingsSet(message.channel.id, 'style', styleId)
-            message.channel.send('This channel will now announce attacks with style #' + styleId).then(debug).catch(log)
+            channelSettingsSet(message.channel.id, 'styleStars', showStars)
+            let extra = (showStars) ? ' w/ War Stats' : ''
+            message.channel.send('This channel will now announce attacks with style #' + styleId + extra).then(debug).catch(log)
           } else {
             message.channel.send('Invalid style id choose a number between 1-6').then(debug).catch(log)
           }
         } else {
-          message.channel.send('Please provide a style id to use for this channel.\n```\n' + prefix + 'style [1-5]\n```').then(debug).catch(log)
+          message.channel.send('Please provide a style id to use for this channel.\n```\n' + prefix + 'style [1-5](+)\n```').then(debug).catch(log)
         }
       } else {
         message.channel.send('Someone with the permissions to manage channels needs to run that command.').then(debug).catch(log)
@@ -937,6 +993,13 @@ DiscordClient.on('message', message => {
       .addField('\u200b', '\u200b', true)
       .addField('Opponent Clan Name', '#opponentClanTag', true)
       message.channel.send({embed}).then(debug).catch(log)
+    } else if (splitMessage[0].toLowerCase() === prefix + 'news' && message.author.id === config.owner) {
+      // Send global announcement to announcing channels from the bot owner. Will mainly be used for updates.
+      getAnnouncingChannels().forEach(channelId => {
+        getChannelById(channelId, discordChannel => {
+          if (discordChannel) discordChannel.send(splitMessage.slice(1).join(' ')).then(debug).catch(log)
+        })
+      })
     }
   }
 })
