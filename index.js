@@ -344,6 +344,32 @@ global.discordAttackMessage = (warId, WarData, clanTag, opponentTag, attackData,
     .addField(WarData.stats.clan.name, WarData.stats.clan.tag, true)
     .addField('\u200b', '\u200b', true)
     .addField(WarData.stats.opponent.name, WarData.stats.opponent.tag, true)
+  } else if (style === 7) {
+    	if (attackData.who === 'opponent') {
+    	text = ''
+    	text += '!wm ' + clanPlayer.mapPosition + 'd'
+    	text += opponentPlayer.mapPosition + ' '
+    	text += attackData.stars + ' ' + attackData.destructionPercentage
+    	}
+    	else if (attackData.who === 'clan'){
+    	text = ''
+    	text += '!wm ' + clanPlayer.mapPosition + 'a'
+    	text += opponentPlayer.mapPosition + ' '
+    	text += attackData.stars + ' ' + attackData.destructionPercentage
+    	}
+  } else if (style === 8) {
+    	if (attackData.who === 'opponent') {
+    	text = ''
+    	text += 'wm ' + clanPlayer.mapPosition + 'd'
+    	text += opponentPlayer.mapPosition + ' '
+    	text += attackData.stars + ' ' + attackData.destructionPercentage
+    	}
+    	else if (attackData.who === 'clan'){
+    	text = ''
+    	text += 'wm ' + clanPlayer.mapPosition + 'a'
+    	text += opponentPlayer.mapPosition + ' '
+    	text += attackData.stars + ' ' + attackData.destructionPercentage
+    	}
   }
   if (styleStars && style > 2) {
     embed
@@ -742,10 +768,11 @@ DiscordClient.on('message', message => {
       helpMessage += '3. `' + prefix + 'warstats #CLANTAG` Display war stats for a clan that is tracked by The Announcer. If not provided with a clan tag it will display war stats for all clans assigned to the channel the command was run in.\n'
       helpMessage += '4. `' + prefix + 'hitrate #CLANTAG` Display hit rate stats for a clan that is tracked by The Announcer. If not provided with a clan tag it will display hit rate stats for all clans assigned to the channel the command was run in.\n'
       helpMessage += '5. `' + prefix + 'playerstats #PLAYERTAG` Display player stats for any player tag provided.\n'
-      helpMessage += '6. `' + prefix + 'style [1-6](+)` Choose a style to use for war attacks in this channel. Requires a number to select style type, optionally append a `+` if you want war stats included in every message.\n'
+      helpMessage += '6. `' + prefix + 'style [1-8](+)` Choose a style to use for war attacks in this channel. Requires a number to select style type, optionally append a `+` if you want war stats included in every message.\n'
       helpMessage += '7. `' + prefix + 'filter all,attacks,defenses,none` Not yet implemented\n'
       // helpMessage += '7. `' + prefix + 'filter all,attacks,defenses,none` Filter which attacks show up in the channel.\n'
-      helpMessage += '8. `' + prefix + 'info` Display bot information.'
+      helpMessage += '8. `' + prefix + 'info` Display bot information.\n'
+      helpMessage += '9. `' + prefix + 'identify` bot as clan member (!identify #aaaaaaa).'
       message.channel.send(helpMessage).then(debug).catch(log)
     } else if (splitMessage[0].toLowerCase() === prefix + 'announce') {
       if (message.member.hasPermission('MANAGE_CHANNELS')) {
@@ -921,21 +948,28 @@ DiscordClient.on('message', message => {
       } else {
         message.channel.send('Please choose a valid filter method `all, attacks, defenses, none`.')
       }
-    } else if (splitMessage[0].toLowerCase() === prefix + 'style') {
+    } else if (splitMessage[0].toLowerCase() === prefix + 'identify') {
+      if (splitMessage[1]) {
+        let identID = splitMessage[1]
+          message.channel.send('!wm identify ' + identID).then(debug).catch(log)
+          } else {
+            message.channel.send('error').then(debug).catch(log)
+          }
+      }  else if (splitMessage[0].toLowerCase() === prefix + 'style') {
       if (message.member.hasPermission('MANAGE_CHANNELS')) {
         if (splitMessage[1]) {
           let showStars = (splitMessage[1].indexOf('+') == 1)
           let styleId = parseInt(splitMessage[1])
-          if (styleId > 0 && styleId < 7) {
+          if (styleId > 0 && styleId < 9) {
             channelSettingsSet(message.channel.id, 'style', styleId)
             channelSettingsSet(message.channel.id, 'styleStars', showStars)
             let extra = (showStars) ? ' w/ War Stats' : ''
             message.channel.send('This channel will now announce attacks with style #' + styleId + extra).then(debug).catch(log)
           } else {
-            message.channel.send('Invalid style id choose a number between 1-6').then(debug).catch(log)
+            message.channel.send('Invalid style id choose a number between 1-8').then(debug).catch(log)
           }
         } else {
-          message.channel.send('Please provide a style id to use for this channel.\n```\n' + prefix + 'style [1-5](+)\n```').then(debug).catch(log)
+          message.channel.send('Please provide a style id to use for this channel.\n```\n' + prefix + 'style [1-8](+)\n```').then(debug).catch(log)
         }
       } else {
         message.channel.send('Someone with the permissions to manage channels needs to run that command.').then(debug).catch(log)
