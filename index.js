@@ -480,6 +480,37 @@ global.discordStatsMessage = (WarData, channelId) => {
   })
 }
 
+global.discordMissingAttackMessage = (clanTag, channelId, PlayersMissingAtack) => {
+  debug(clanTag)
+
+  let showmissing = channelSettingsGet(channelId, 'showmissing')
+  if (!showmissing) showmissing = 'no'
+
+  if (showmissing === 'yes' && PlayersMissingAtack.length > 0) {
+
+    PlayersMissingAtack.forEach(member => {
+      const embed = new Discord.RichEmbed()
+      .setTitle(Clans[clanTag].name + ' vs ' + Clans[clanTag].opponent.name)
+      .setFooter(clanTag + ' vs ' + Clans[clanTag].opponent.tag)
+
+      if (!member.attacks) {
+        embed.addField(member.name + " is missing 2 attacks!!!", member.tag)
+          .setColor(0xFF484E)
+        } else {
+          if (member.attacks.length != 2) {
+            embed.addField(member.name + " is missing 1 attack!", member.tag)
+            .setColor(0xFFBC48)
+        }
+      }
+      getChannelById(channelId, discordChannel => {
+        if (discordChannel) discordChannel.send({ embed }).then(debug).catch(log)
+      })
+    })
+
+  }
+
+}
+
 global.discordReportMessage = (warId, WarData, clanTag, message, channelId) => {
   debug(clanTag)
   let emojis = DiscordChannelEmojis
@@ -772,7 +803,8 @@ DiscordClient.on('message', message => {
       helpMessage += '7. `' + prefix + 'filter all,attacks,defenses,none` Not yet implemented\n'
       // helpMessage += '7. `' + prefix + 'filter all,attacks,defenses,none` Filter which attacks show up in the channel.\n'
       helpMessage += '8. `' + prefix + 'info` Display bot information.\n'
-      helpMessage += '9. `' + prefix + 'identify` bot as clan member (!identify #aaaaaaa).'
+      helpMessage += '9. `' + prefix + 'identify` bot as clan member (!identify #aaaaaaa).\n'
+      helpMessage += '10. `' + prefix + 'showmissing yes,no` Show missing attacks with final hours and final minutes messages. Default value is no.\n'
       message.channel.send(helpMessage).then(debug).catch(log)
     } else if (splitMessage[0].toLowerCase() === prefix + 'announce') {
       if (message.member.hasPermission('MANAGE_CHANNELS')) {
@@ -947,6 +979,17 @@ DiscordClient.on('message', message => {
         }
       } else {
         message.channel.send('Please choose a valid filter method `all, attacks, defenses, none`.')
+      }
+    } else if (splitMessage[0].toLowerCase() === prefix + 'showmissing') {
+      if (splitMessage[1] && (splitMessage[1].toLowerCase() === 'yes' || splitMessage[1].toLowerCase() === 'no')) {
+        channelSettingsSet(message.channel.id, 'showmissing', splitMessage[1].toLowerCase())
+        if (splitMessage[1].toLowerCase() === 'yes') {
+          message.channel.send('Announcer will now announce missing attacks with final hours and final minutes messages.')
+        } else if (splitMessage[1].toLowerCase() === 'no') {
+          message.channel.send('Announcer will now NOT announce missing attacks with final hours and final minutes messages.')
+        }
+      } else {
+        message.channel.send('Please choose a valid showmissing method `yes, no`.')
       }
     } else if (splitMessage[0].toLowerCase() === prefix + 'identify') {
       if (splitMessage[1]) {

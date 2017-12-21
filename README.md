@@ -20,6 +20,7 @@ A node.js discord bot written to monitor the Clash of Clans API and announce war
 1. `!playerstats #PLAYERTAG` Display player stats for any player tag provided.
 1. `!style [1-6](+)` Choose a style to use for war attacks in this channel. Requires a number to select style type, optionally append a + if you want war stats included in every message.
 1. `!styletest` Show a preview of all styles.
+1. `!showmissing [yes,no]` Show missing attacks with final hours and final minutes messages. Default value is no.
 1. `!info` Display bot information.
 1. `!help` Display list of commands.
 

@@ -83,14 +83,20 @@ module.exports = class Clan {
       debug('State: ' + data.state)
       debug(data, true)
 
+      let PlayersMissingAtack = []
       // ClanStorage.setItemSync(this.warId, this.WarData)
       let tmpAttacks = {}
       data.clan.members.forEach(member => {
         Players[member.tag] = member
         if (member.attacks) {
+          if (member.attacks.length != 2) {
+            PlayersMissingAtack.push(member)
+          }
           member.attacks.forEach(attack => {
             tmpAttacks[attack.order] = Object.assign(attack, {who: 'clan'})
           })
+        }else{
+          PlayersMissingAtack.push(member)
         }
       })
       data.opponent.members.forEach(member => {
@@ -253,6 +259,9 @@ module.exports = class Clan {
             let message = config.messages.lastHour
             this.WarData.lastHourReported = true
             discordReportMessage(this.warId, this.WarData, this.tag, message, channelId)
+            if (PlayersMissingAtack.length > 0) {
+              discordMissingAttackMessage(this.tag, channelId, PlayersMissingAtack)
+            }
           })
         })
       }
@@ -262,6 +271,9 @@ module.exports = class Clan {
             let message = config.messages.finalMinutes
             this.WarData.finalMinutesReported = true
             discordReportMessage(this.warId, this.WarData, this.tag, message, channelId)
+            if (PlayersMissingAtack.length > 0) {
+              discordMissingAttackMessage(this.tag, message, channelId, PlayersMissingAtack)
+            }
           })
         })
       }
