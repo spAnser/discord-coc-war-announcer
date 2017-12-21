@@ -370,6 +370,18 @@ global.discordAttackMessage = (warId, WarData, clanTag, opponentTag, attackData,
     	text += opponentPlayer.mapPosition + ' '
     	text += attackData.stars + ' ' + attackData.destructionPercentage
     	}
+  } else if (style === 9) {
+    attackMessage += '\n' + attackData.attackerTag
+    defendMessage += '\n' + attackData.defenderTag
+    embed = new Discord.RichEmbed()
+      .setImage((attackData.who === 'clan') ? WarData.stats.clan.badge.small : WarData.stats.opponent.badge.small)
+      .setColor(StarColors[attackData.stars])
+      .addField(clanPlayer.name, (attackData.who === 'clan') ? attackMessage : defendMessage, true)
+      .addField(DiscordTownHallEmojis[clanPlayer.townhallLevel - 1] + ' ' + clanPlayer.mapPosition + ' vs ' + opponentPlayer.mapPosition + ' ' + DiscordTownHallEmojis[opponentPlayer.townhallLevel - 1], messageStars + '\n\t\t' + attackData.destructionPercentage + '%', true)
+      .addField(opponentPlayer.name, (attackData.who === 'clan') ? defendMessage : attackMessage, true)
+      .addField(WarData.stats.clan.name, WarData.stats.clan.tag, true)
+      .addField('\u200b', '\u200b', true)
+      .addField(WarData.stats.opponent.name, WarData.stats.opponent.tag, true)
   }
   if (styleStars && style > 2) {
     embed
@@ -799,7 +811,7 @@ DiscordClient.on('message', message => {
       helpMessage += '3. `' + prefix + 'warstats #CLANTAG` Display war stats for a clan that is tracked by The Announcer. If not provided with a clan tag it will display war stats for all clans assigned to the channel the command was run in.\n'
       helpMessage += '4. `' + prefix + 'hitrate #CLANTAG` Display hit rate stats for a clan that is tracked by The Announcer. If not provided with a clan tag it will display hit rate stats for all clans assigned to the channel the command was run in.\n'
       helpMessage += '5. `' + prefix + 'playerstats #PLAYERTAG` Display player stats for any player tag provided.\n'
-      helpMessage += '6. `' + prefix + 'style [1-8](+)` Choose a style to use for war attacks in this channel. Requires a number to select style type, optionally append a `+` if you want war stats included in every message.\n'
+      helpMessage += '6. `' + prefix + 'style [1-9](+)` Choose a style to use for war attacks in this channel. Requires a number to select style type, optionally append a `+` if you want war stats included in every message.\n'
       helpMessage += '7. `' + prefix + 'filter all,attacks,defenses,none` Not yet implemented\n'
       // helpMessage += '7. `' + prefix + 'filter all,attacks,defenses,none` Filter which attacks show up in the channel.\n'
       helpMessage += '8. `' + prefix + 'info` Display bot information.\n'
@@ -1003,13 +1015,13 @@ DiscordClient.on('message', message => {
         if (splitMessage[1]) {
           let showStars = (splitMessage[1].indexOf('+') == 1)
           let styleId = parseInt(splitMessage[1])
-          if (styleId > 0 && styleId < 9) {
+          if (styleId > 0 && styleId < 10) {
             channelSettingsSet(message.channel.id, 'style', styleId)
             channelSettingsSet(message.channel.id, 'styleStars', showStars)
             let extra = (showStars) ? ' w/ War Stats' : ''
             message.channel.send('This channel will now announce attacks with style #' + styleId + extra).then(debug).catch(log)
           } else {
-            message.channel.send('Invalid style id choose a number between 1-8').then(debug).catch(log)
+            message.channel.send('Invalid style id choose a number between 1-9').then(debug).catch(log)
           }
         } else {
           message.channel.send('Please provide a style id to use for this channel.\n```\n' + prefix + 'style [1-8](+)\n```').then(debug).catch(log)

@@ -191,6 +191,7 @@ module.exports = class Clan {
         clan: {
           tag: data.clan.tag,
           name: data.clan.name,
+          badge: data.clan.badgeUrls,
           stars: data.clan.stars,
           attacks: data.clan.attacks,
           destructionPercentage: data.clan.destructionPercentage,
@@ -199,6 +200,7 @@ module.exports = class Clan {
         opponent: {
           tag: data.opponent.tag,
           name: data.opponent.name,
+          badge: data.opponent.badgeUrls,
           stars: data.opponent.stars,
           attacks: data.opponent.attacks,
           destructionPercentage: data.opponent.destructionPercentage,
