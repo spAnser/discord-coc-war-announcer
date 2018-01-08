@@ -95,7 +95,7 @@ module.exports = class Clan {
           member.attacks.forEach(attack => {
             tmpAttacks[attack.order] = Object.assign(attack, {who: 'clan'})
           })
-        }else{
+        } else {
           PlayersMissingAtack.push(member)
         }
       })
