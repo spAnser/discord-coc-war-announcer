@@ -370,6 +370,18 @@ global.discordAttackMessage = (warId, WarData, clanTag, opponentTag, attackData,
     	text += opponentPlayer.mapPosition + ' '
     	text += attackData.stars + ' ' + attackData.destructionPercentage
     	}
+  } else if (style === 9) {
+    attackMessage += '\n' + attackData.attackerTag
+    defendMessage += '\n' + attackData.defenderTag
+    embed = new Discord.RichEmbed()
+      .setImage((attackData.who === 'clan') ? WarData.stats.clan.badge.small : WarData.stats.opponent.badge.small)
+      .setColor(StarColors[attackData.stars])
+      .addField(clanPlayer.name, (attackData.who === 'clan') ? attackMessage : defendMessage, true)
+      .addField(DiscordTownHallEmojis[clanPlayer.townhallLevel - 1] + ' ' + clanPlayer.mapPosition + ' vs ' + opponentPlayer.mapPosition + ' ' + DiscordTownHallEmojis[opponentPlayer.townhallLevel - 1], messageStars + '\n\t\t' + attackData.destructionPercentage + '%', true)
+      .addField(opponentPlayer.name, (attackData.who === 'clan') ? defendMessage : attackMessage, true)
+      .addField(WarData.stats.clan.name, WarData.stats.clan.tag, true)
+      .addField('\u200b', '\u200b', true)
+      .addField(WarData.stats.opponent.name, WarData.stats.opponent.tag, true)
   }
   if (styleStars && style > 2) {
     embed
@@ -478,6 +490,37 @@ global.discordStatsMessage = (WarData, channelId) => {
   getChannelById(channelId, discordChannel => {
     if (discordChannel) discordChannel.send({embed}).then(debug).catch(log)
   })
+}
+
+global.discordMissingAttackMessage = (clanTag, channelId, PlayersMissingAtack) => {
+  debug(clanTag)
+
+  let showmissing = channelSettingsGet(channelId, 'showmissing')
+  if (!showmissing) showmissing = 'no'
+
+  if (showmissing === 'yes' && PlayersMissingAtack.length > 0) {
+
+    PlayersMissingAtack.forEach(member => {
+      const embed = new Discord.RichEmbed()
+      .setTitle(Clans[clanTag].name + ' vs ' + Clans[clanTag].opponent.name)
+      .setFooter(clanTag + ' vs ' + Clans[clanTag].opponent.tag)
+
+      if (!member.attacks) {
+        embed.addField(member.name + " is missing 2 attacks!!!", member.tag)
+          .setColor(0xFF484E)
+        } else {
+          if (member.attacks.length != 2) {
+            embed.addField(member.name + " is missing 1 attack!", member.tag)
+            .setColor(0xFFBC48)
+        }
+      }
+      getChannelById(channelId, discordChannel => {
+        if (discordChannel) discordChannel.send({ embed }).then(debug).catch(log)
+      })
+    })
+
+  }
+
 }
 
 global.discordReportMessage = (warId, WarData, clanTag, message, channelId) => {
@@ -768,11 +811,12 @@ DiscordClient.on('message', message => {
       helpMessage += '3. `' + prefix + 'warstats #CLANTAG` Display war stats for a clan that is tracked by The Announcer. If not provided with a clan tag it will display war stats for all clans assigned to the channel the command was run in.\n'
       helpMessage += '4. `' + prefix + 'hitrate #CLANTAG` Display hit rate stats for a clan that is tracked by The Announcer. If not provided with a clan tag it will display hit rate stats for all clans assigned to the channel the command was run in.\n'
       helpMessage += '5. `' + prefix + 'playerstats #PLAYERTAG` Display player stats for any player tag provided.\n'
-      helpMessage += '6. `' + prefix + 'style [1-8](+)` Choose a style to use for war attacks in this channel. Requires a number to select style type, optionally append a `+` if you want war stats included in every message.\n'
+      helpMessage += '6. `' + prefix + 'style [1-9](+)` Choose a style to use for war attacks in this channel. Requires a number to select style type, optionally append a `+` if you want war stats included in every message.\n'
       helpMessage += '7. `' + prefix + 'filter all,attacks,defenses,none` Not yet implemented\n'
       // helpMessage += '7. `' + prefix + 'filter all,attacks,defenses,none` Filter which attacks show up in the channel.\n'
       helpMessage += '8. `' + prefix + 'info` Display bot information.\n'
-      helpMessage += '9. `' + prefix + 'identify` bot as clan member (!identify #aaaaaaa).'
+      helpMessage += '9. `' + prefix + 'identify` bot as clan member (!identify #aaaaaaa).\n'
+      helpMessage += '10. `' + prefix + 'showmissing yes,no` Show missing attacks with final hours and final minutes messages. Default value is no.\n'
       message.channel.send(helpMessage).then(debug).catch(log)
     } else if (splitMessage[0].toLowerCase() === prefix + 'announce') {
       if (message.member.hasPermission('MANAGE_CHANNELS')) {
@@ -948,6 +992,17 @@ DiscordClient.on('message', message => {
       } else {
         message.channel.send('Please choose a valid filter method `all, attacks, defenses, none`.')
       }
+    } else if (splitMessage[0].toLowerCase() === prefix + 'showmissing') {
+      if (splitMessage[1] && (splitMessage[1].toLowerCase() === 'yes' || splitMessage[1].toLowerCase() === 'no')) {
+        channelSettingsSet(message.channel.id, 'showmissing', splitMessage[1].toLowerCase())
+        if (splitMessage[1].toLowerCase() === 'yes') {
+          message.channel.send('Announcer will now announce missing attacks with final hours and final minutes messages.')
+        } else if (splitMessage[1].toLowerCase() === 'no') {
+          message.channel.send('Announcer will now NOT announce missing attacks with final hours and final minutes messages.')
+        }
+      } else {
+        message.channel.send('Please choose a valid showmissing method `yes, no`.')
+      }
     } else if (splitMessage[0].toLowerCase() === prefix + 'identify') {
       if (splitMessage[1]) {
         let identID = splitMessage[1]
@@ -960,13 +1015,13 @@ DiscordClient.on('message', message => {
         if (splitMessage[1]) {
           let showStars = (splitMessage[1].indexOf('+') == 1)
           let styleId = parseInt(splitMessage[1])
-          if (styleId > 0 && styleId < 9) {
+          if (styleId > 0 && styleId < 10) {
             channelSettingsSet(message.channel.id, 'style', styleId)
             channelSettingsSet(message.channel.id, 'styleStars', showStars)
             let extra = (showStars) ? ' w/ War Stats' : ''
             message.channel.send('This channel will now announce attacks with style #' + styleId + extra).then(debug).catch(log)
           } else {
-            message.channel.send('Invalid style id choose a number between 1-8').then(debug).catch(log)
+            message.channel.send('Invalid style id choose a number between 1-9').then(debug).catch(log)
           }
         } else {
           message.channel.send('Please provide a style id to use for this channel.\n```\n' + prefix + 'style [1-8](+)\n```').then(debug).catch(log)
