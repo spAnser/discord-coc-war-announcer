@@ -575,8 +575,9 @@ let playerReport = (channel, data) => {
   let count = 0
   data.troops.forEach(troop => {
     if (troop.village === 'home') {
+      count++
       troopLevels += DiscordTroopEmojis[troop.name] + ' ' + troop.level
-      if (count > 0 && count % 7 === 0) {
+      if (count > 0 && count % 8 === 0) {
         if (troop.level === troop.maxLevel) {
           troopLevels += '*\n'
         } else {
@@ -589,7 +590,6 @@ let playerReport = (channel, data) => {
           troopLevels += '\u2002\u2002'
         }
       }
-      count++
     }
   })
   if (troopLevels) embed.addField('Troop Levels', troopLevels.slice(0, troopLevels.length - 2))
@@ -598,8 +598,9 @@ let playerReport = (channel, data) => {
   count = 0
   data.spells.forEach(spell => {
     if (spell.village === 'home') {
+      count++
       spellLevels += DiscordSpellEmojis[spell.name] + ' ' + spell.level
-      if (count > 0 && count % 7 === 0) {
+      if (count > 0 && count % 8 === 0) {
         if (spell.level === spell.maxLevel) {
           spellLevels += '*\n'
         } else {
@@ -612,7 +613,6 @@ let playerReport = (channel, data) => {
           spellLevels +=  '\u2002\u2002'
         }
       }
-      count++
     }
   })
   if (spellLevels) embed.addField('Spell Levels', spellLevels.slice(0, spellLevels.length - 2))
@@ -621,8 +621,9 @@ let playerReport = (channel, data) => {
   count = 0
   data.heroes.forEach(hero => {
     if (hero.village === 'home') {
+      count++
       heroLevels += DiscordHeroEmojis[hero.name] + ' ' + hero.level
-      if (count > 0 && count % 7 === 0) {
+      if (count > 0 && count % 8 === 0) {
         if (hero.level === hero.maxLevel) {
           heroLevels +=  '*\n'
         } else {
@@ -635,7 +636,6 @@ let playerReport = (channel, data) => {
           heroLevels +=  '\u2002\u2002'
         }
       }
-      count++
     }
   })
   if (heroLevels) embed.addField('Hero Levels', heroLevels.slice(0, heroLevels.length - 2))
@@ -649,8 +649,9 @@ let playerReport = (channel, data) => {
     let count = 0
     data.troops.forEach(troop => {
       if (troop.village === 'builderBase') {
+        count++
         troopLevels += DiscordTroopEmojis[troop.name] + ' ' + troop.level
-        if (count > 0 && count % 7 === 0) {
+        if (count > 0 && count % 8 === 0) {
           if (troop.level === troop.maxLevel) {
             troopLevels += '*\n'
           } else {
@@ -663,7 +664,6 @@ let playerReport = (channel, data) => {
             troopLevels += '\u2002\u2002'
           }
         }
-        count++
       }
     })
     if (troopLevels) embed.addField('Troop Levels', troopLevels.slice(0, troopLevels.length - 2))
@@ -672,8 +672,9 @@ let playerReport = (channel, data) => {
     count = 0
     data.spells.forEach(spell => {
       if (spell.village === 'builderBase') {
+        count++
         spellLevels += DiscordSpellEmojis[spell.name] + ' ' + spell.level
-        if (count > 0 && count % 7 === 0) {
+        if (count > 0 && count % 8 === 0) {
           if (spell.level === spell.maxLevel) {
             spellLevels += '*\n'
           } else {
@@ -686,7 +687,6 @@ let playerReport = (channel, data) => {
             spellLevels +=  '\u2002\u2002'
           }
         }
-        count++
       }
     })
     if (spellLevels) embed.addField('Spell Levels', spellLevels.slice(0, spellLevels.length - 2))
@@ -695,8 +695,9 @@ let playerReport = (channel, data) => {
     count = 0
     data.heroes.forEach(hero => {
       if (hero.village === 'builderBase') {
+        count++
         heroLevels += DiscordHeroEmojis[hero.name] + ' ' + hero.level
-        if (count > 0 && count % 7 === 0) {
+        if (count > 0 && count % 8 === 0) {
           if (hero.level === hero.maxLevel) {
             heroLevels +=  '*\n'
           } else {
@@ -709,7 +710,6 @@ let playerReport = (channel, data) => {
             heroLevels +=  '\u2002\u2002'
           }
         }
-        count++
       }
     })
     if (heroLevels) embed.addField('Hero Levels', heroLevels.slice(0, heroLevels.length - 2))
