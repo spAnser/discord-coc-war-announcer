@@ -85,6 +85,7 @@ global.DiscordTownHallEmojis = [
   '<:townhall9:316693282119876609>',
   '<:townhall10:316693308271493120>',
   '<:townhall11:316693320237580300>',
+  '<:townhall12:471405233365319680>',
 ]
 global.DiscordBuilderHallEmojis = [
   '<:builderhall1:316693013718106123>',
@@ -116,6 +117,10 @@ global.DiscordTroopEmojis = {
   'Bowler': '<:bowler:316393732620419083>',
   'Baby Dragon': '<:babydragon:316393730016018442>',
   'Miner': '<:miner:316393733216272384>',
+  'Electro Dragon': '<:electrodragon:471407003969781780>',
+
+  'Battle Blimp': '<:battleblimp:471407003961524224>',
+  'Wall Wrecker': '<:wallwrecker:471407005257564181>',
 
   'Raged Barbarian': '<:ragedbarbarian:316393733245632522>',
   'Sneaky Archer': '<:sneakyarcher:316393733421793280>',
