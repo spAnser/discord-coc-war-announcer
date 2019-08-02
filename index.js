@@ -96,14 +96,15 @@ global.DiscordTownHallEmojis = [
   '<:townhall12:507038843695005716>',
 ]
 global.DiscordBuilderHallEmojis = [
-  '<:builderhall1:507038834056232960>',
-  '<:builderhall2:507038840741953536>',
-  '<:builderhall3:507038841287475213>',
-  '<:builderhall4:507038842130268161>',
-  '<:builderhall5:507038842570801152>',
-  '<:builderhall6:507038843032174612>',
-  '<:builderhall7:507038843715846154>',
-  '<:builderhall8:507038843879292928>',
+  '<:builderhall1:316693013718106123>',
+  '<:builderhall2:316693057988853760>',
+  '<:builderhall3:316693072022994944>',
+  '<:builderhall4:316693083754463232>',
+  '<:builderhall5:316693095448182784>',
+  '<:builderhall6:316693106651168769>',
+  '<:builderhall7:316693118269390848>',
+  '<:builderhall8:316693131770724353>',
+  '<:builderhall9:>',
 ]
 global.DiscordTroopEmojis = {
   'Barbarian': '<:barbarian:316393732671012864>',
@@ -126,9 +127,11 @@ global.DiscordTroopEmojis = {
   'Baby Dragon': '<:babydragon:316393730016018442>',
   'Miner': '<:miner:316393733216272384>',
   'Electro Dragon': '<:electrodragon:471407003969781780>',
+  'Ice Golem': '<:icegolem:>',
 
   'Battle Blimp': '<:battleblimp:471407003961524224>',
   'Wall Wrecker': '<:wallwrecker:471407005257564181>',
+  'Stone Slammer': '<:stoneslammer:>',
 
   'Raged Barbarian': '<:ragedbarbarian:316393733245632522>',
   'Sneaky Archer': '<:sneakyarcher:316393733421793280>',
@@ -139,6 +142,7 @@ global.DiscordTroopEmojis = {
   'Cannon Cart': '<:cannoncart:316393732825939969>',
   'Drop Ship': '<:dropship:316393733207621634>',
   'Night Witch': '<:nightwitch:316393733409079306>',
+  'Hog Glider': '<:hogglider:>',
 }
 global.DiscordSpellEmojis = {
   'Lightning Spell': '<:lightningspell:310230391489429506>',
@@ -151,8 +155,14 @@ global.DiscordSpellEmojis = {
   'Haste Spell': '<:hastespell:310230391317331968>',
   'Clone Spell': '<:clonespell:310230390407430144>',
   'Skeleton Spell': '<:skeletonspell:310230391262937094>',
+  'Bat Spell': '<:batspell:>',
 }
 global.DiscordHeroEmojis = {
+  'Barbarian King': '<:barbarianking:316393776765468674>',
+  'Archer Queen': '<:archerqueen:316393777075978251>',
+  'Grand Warden': '<:grandwarden:316393831660781569>',
+  'Battle Machine': '<:warmachine:316393831820165122>',
+}
   'Barbarian King': '<:barbarianking:316393776765468674>',
   'Archer Queen': '<:archerqueen:316393777075978251>',
   'Grand Warden': '<:grandwarden:316393831660781569>',
