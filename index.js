@@ -1,4 +1,4 @@
-'use strict'
+﻿'use strict'
 
 console.log('\x1Bc')
 
@@ -533,7 +533,7 @@ global.discordMissingAttackMessage = (clanTag, channelId, PlayersMissingAtack) =
         }
       }
       getChannelById(channelId, discordChannel => {
-        if (discordChannel) discordChannel.send({ embed }).then(debug).catch(log)
+        if (discordChannel) discordChannel.send('@everyone',{ embed }).then(debug).catch(log)
       })
     })
 
