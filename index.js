@@ -952,8 +952,8 @@ DiscordClient.on('message', message => {
         if (splitMessage[1]) {
           let clanTag = splitMessage[1].toUpperCase().replace(/O/g, '0')
           let announcingIndex = announcingClan(clanTag)
-          if (updateInterval.has(newClan.tag)) {
-            clearInterval(updateInterval.get(newClan.tag));
+          if (updateInterval.has(clan.tag)) {
+            clearInterval(updateInterval.get(clan.tag));
           }
           if (typeof announcingIndex !== 'undefined') {
             let channelIndex = AnnounceClans[announcingIndex].channels.indexOf(channelId)
