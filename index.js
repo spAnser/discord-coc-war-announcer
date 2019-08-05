@@ -5,6 +5,8 @@ console.log('\x1Bc')
 const LOG = true
 const DEBUG = false
 
+var fs = require("fs")
+var isCWL;
 
 global.cleanArray = actual => {
   if (actual && actual.constructor === Array) {
@@ -36,6 +38,7 @@ global.debug = function debug() {
 }
 
 global.updateInterval = new Map();
+
 
 const crypto = require('crypto')
 const util = require('util')
@@ -524,14 +527,18 @@ global.discordMissingAttackMessage = (clanTag, channelId, PlayersMissingAtack) =
       .setFooter(clanTag + ' vs ' + Clans[clanTag].opponent.tag)
 
       if (!member.attacks) {
-        embed.addField(member.name + " is missing 2 attacks!!!", member.tag)
+        embed.addField(member.name + " has not attacked!!!", member.tag)
           .setColor(0xFF484E)
-        } else {
-          if (member.attacks.length != 2) {
+        } else 
+        {
+          fs.readFile("CWL.txt", "utf-8", (CWL) => {
+              isCWL = CWL;
+          });
+          if (isCWL != "true" && (member.attacks.length != 2)) {
             embed.addField(member.name + " is missing 1 attack!", member.tag)
             .setColor(0xFFBC48)
+          }
         }
-      }
       getChannelById(channelId, discordChannel => {
         if (discordChannel) discordChannel.send('@everyone',{ embed }).then(debug).catch(log)
       })
