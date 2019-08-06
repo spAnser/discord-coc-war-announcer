@@ -1,3 +1,5 @@
 .node-persist
+.vs
 node_modules/
 /config.js
+/start.bat

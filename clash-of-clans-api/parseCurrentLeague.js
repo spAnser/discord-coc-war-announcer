@@ -10,14 +10,13 @@ const chalk = require('chalk')
 const nodePersist = require('node-persist');
 const parseCurrentWar = require('./parseCurrentWar');
 
-var fs = require("fs")
-var CWL;
-
 global.ClanStorage = nodePersist.create({
     dir: '.node-persist/clan-storage',
     expiredInterval: 1000 * 60 * 60 * 24 * 9 // Cleanup Files older than a week + 2 days for prep / war day.
 })
 ClanStorage.initSync();
+
+var isCWL = false;
 
 module.exports = function parseCurrentLeague(data, apiQueue, overrideConfig) {
     if (!data || !data.rounds) return;
@@ -26,13 +25,12 @@ module.exports = function parseCurrentLeague(data, apiQueue, overrideConfig) {
             this.fetchCurrentLeagueWar(apiQueue, war, (data) => {
                 if (data.state === 'inWar' && (data.clan.tag === this.tag || data.opponent.tag === this.tag)) {
                     // grab the war data and let parseCurrentWar handle it from there.
-                    CWL = "true";
-                        (parseCurrentWar.bind(this)(data, overrideConfig));
-                    fs.writeFile("CWL.txt", CWL, "utf-8", function (err) {
-                        if (err) console.log(err);
-                        console.log("Successfully written to CWL.txt, CWL =",CWL);
-                    });
+                    isCWL = true;
+                    ClanStorage.setItemSync('CWL', true);
+                    (parseCurrentWar.bind(this)(data, overrideConfig));
                 }
+                else if (isCWL != true)
+                { ClanStorage.setItemSync('CWL', false) }
             });
         });
     });

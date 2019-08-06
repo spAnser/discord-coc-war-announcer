@@ -9,8 +9,6 @@ const util = require('util')
 const chalk = require('chalk')
 const nodePersist = require('node-persist')
 
-var fs = require("fs")
-
 global.ClanStorage = nodePersist.create({
     dir: '.node-persist/clan-storage',
     expiredInterval: 1000 * 60 * 60 * 24 * 9 // Cleanup Files older than a week + 2 days for prep / war day.
@@ -304,14 +302,8 @@ module.exports = function parseCurrentWar(data, overrideConfig = {}) {
             })
         }
         if (!this.WarData.endStatsReported && data.state == 'warEnded') {
-			    CWL = "false";
-			    fs.writeFile("CWL.txt", CWL, "utf-8", function (err) 
-				{
-                 if (err) console.log(err);
-                 console.log("Successfully written to CWL.txt, CWL =",CWL);
-                });
             this.WarData.endStatsReported = true
-            ClanStorage.setItemSync(this.warId, this.WarData)
+            ClanStorage.setItemSync(this.warId, this.WarData && ('CWL', false))
             getClanChannel(this.tag, channels => {
                 channels.forEach(channelId => {
                     discordStatsMessage(this.WarData, channelId)
@@ -323,9 +315,14 @@ module.exports = function parseCurrentWar(data, overrideConfig = {}) {
         let announcingIndex = announcingClan(this.tag)
         AnnounceClans[announcingIndex].reason = data.reason
         AnnounceClans[announcingIndex].state = data.state
-
-        if (data.state == 'notInWar') {
+        let isCWL = ClanStorage.getItemSync('CWL')
+        if (data.state == 'notInWar' && (isCWL != true)) {
             log(chalk.yellow.bold(this.tag.toUpperCase().replace(/O/g, '0') + ' Clan is not currently in war.'))
+        }
+        else {
+            if (data.state == 'notInWar' && (isCWL == true)) {
+                console.log(chalk.green.bold(this.tag.toUpperCase().replace(/O/g, '0') + ' Clan is currently in CWL war.'))
+            }
         }
         if (data.reason == 'accessDenied' && !AnnounceClans[announcingIndex].notPublicReported) {
             AnnounceClans[announcingIndex].notPublicReported = true
