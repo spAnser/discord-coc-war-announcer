@@ -311,7 +311,11 @@ module.exports = class Clan {
         getClanChannel(this.tag, channels => {
           channels.forEach(channelId => {
             getChannelById(channelId, discordChannel => {
-              if (discordChannel) discordChannel.send(this.tag + '\'s war log is not public.').then(debug).catch(log)
+              if (discordChannel) discordChannel.send(this.tag + '\'s war log is not public.').then(debug).catch((data) => {
+                log('warLogNotPublic: Send Embed Error')
+                log(data)
+                removeClanFromChannel(data.code, clanTag, channelId)
+              })
             })
           })
         })
