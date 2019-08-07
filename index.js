@@ -542,7 +542,7 @@ global.discordMissingAttackMessage = (clanTag, channelId, PlayersMissingAtack) =
           }
         }
       getChannelById(channelId, discordChannel => {
-        if (discordChannel) discordChannel.send('@everyone',{ embed }).then(debug).catch(log)
+        if (discordChannel) discordChannel.send({ embed }).then(debug).catch(log)
       })
     })
 
@@ -565,7 +565,7 @@ global.discordReportMessage = (warId, WarData, clanTag, message, channelId) => {
 
   ClanStorage.setItemSync(warId, WarData)
   getChannelById(channelId, discordChannel => {
-    if (discordChannel) discordChannel.send({embed}).then(debug).catch(log)
+    if (discordChannel) discordChannel.send('@everyone',{embed}).then(debug).catch(log)
   })
 }
 
