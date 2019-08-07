@@ -16,7 +16,7 @@ global.ClanStorage = nodePersist.create({
 })
 ClanStorage.initSync();
 
-var isCWL = false;
+var isCWL;
 
 module.exports = function parseCurrentLeague(data, apiQueue, overrideConfig) {
     if (!data || !data.rounds) return;
