@@ -140,7 +140,7 @@ global.DiscordTroopEmojis = {
   'Cannon Cart': '<:cannoncart:316393732825939969>',
   'Drop Ship': '<:dropship:316393733207621634>',
   'Night Witch': '<:nightwitch:316393733409079306>',
-  'Hog Glider': '<:hogglider:>',
+  'Hog Glider': '<:hogglider:608816402123587625>',
 }
 global.DiscordSpellEmojis = {
   'Lightning Spell': '<:lightningspell:310230391489429506>',
