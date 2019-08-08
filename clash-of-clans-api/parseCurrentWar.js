@@ -45,20 +45,20 @@ module.exports = function parseCurrentWar(data, overrideConfig = {}) {
         debug('State: ' + data.state)
         debug(data, true)
 
-        let PlayersMissingAtack = []
+        let PlayersMissingAttack = []
         // ClanStorage.setItemSync(this.warId, this.WarData)
         let tmpAttacks = {}
         data.clan.members.forEach(member => {
             Players[member.tag] = member
             if (member.attacks) {
                 if (member.attacks.length != (overrideConfig.availableAttacks || 2)) {
-                    PlayersMissingAtack.push(member)
+                    PlayersMissingAttack.push(member)
                 }
                 member.attacks.forEach(attack => {
                     tmpAttacks[attack.order] = Object.assign(attack, { who: 'clan' })
                 })
             } else {
-                PlayersMissingAtack.push(member)
+                PlayersMissingAttack.push(member)
             }
         })
         data.opponent.members.forEach(member => {
@@ -223,8 +223,8 @@ module.exports = function parseCurrentWar(data, overrideConfig = {}) {
                     let message = config.messages.lastHour
                     this.WarData.lastHourReported = true
                     discordReportMessage(this.warId, this.WarData, this.tag, message, channelId)
-                    if (PlayersMissingAtack.length > 0) {
-                        discordMissingAttackMessage(this.tag, channelId, PlayersMissingAtack)
+                    if (PlayersMissingAttack.length > 0) {
+                        discordMissingAttackMessage(this.tag, channelId, PlayersMissingAttack)
                     }
                 })
             })
@@ -235,8 +235,8 @@ module.exports = function parseCurrentWar(data, overrideConfig = {}) {
                     let message = config.messages.finalMinutes
                     this.WarData.finalMinutesReported = true
                     discordReportMessage(this.warId, this.WarData, this.tag, message, channelId)
-                    if (PlayersMissingAtack.length > 0) {
-                        discordMissingAttackMessage(this.tag, message, channelId, PlayersMissingAtack)
+                    if (PlayersMissingAttack.length > 0) {
+                        discordMissingAttackMessage(this.tag, message, channelId, PlayersMissingAttack)
                     }
                 })
             })

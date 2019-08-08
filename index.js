@@ -578,15 +578,15 @@ global.discordStatsMessage = (WarData, channelId) => {
   })
 }
 
-global.discordMissingAttackMessage = (clanTag, channelId, PlayersMissingAtack) => {
+global.discordMissingAttackMessage = (clanTag, channelId, PlayersMissingAttack) => {
   debug(clanTag)
 
   let showmissing = channelSettingsGet(channelId, 'showmissing')
   if (!showmissing) showmissing = 'no'
 
-  if (showmissing === 'yes' && PlayersMissingAtack.length > 0) {
+  if (showmissing === 'yes' && PlayersMissingAttack.length > 0) {
 
-    PlayersMissingAtack.forEach(member => {
+    PlayersMissingAttack.forEach(member => {
       const embed = new Discord.RichEmbed()
         if (!member.attacks) {
             embed.setTitle(Clans[clanTag].name + ' vs ' + Clans[clanTag].opponent.name)
