@@ -37,6 +37,7 @@ A node.js discord bot written to monitor the Clash of Clans API and announce war
 1. The bot needs you clan tag and a *Channel ID* to post the announcements in. The clan will need a public war log. To get the *Channel ID* follow [this guide](https://support.discordapp.com/hc/en-us/articles/206346498-Where-can-I-find-my-server-ID).
 1. Give the bot permissions on your server using this url `https://discordapp.com/oauth2/authorize?client_id=__CLIENT_ID__&scope=bot&permissions=396352` and replace `__CLIENT_ID__` with your bot's client id
 1. The clan being monitored will need their war log set to public.
+1. You will need to follow the custom emoji guide in the FAQ below, even for the included emojis. **
 1. Run `node index.js` to start the bot.
 1. If you need the bot to be kept alive look into [PM2](https://github.com/Unitech/pm2)
 
@@ -66,6 +67,10 @@ A node.js discord bot written to monitor the Clash of Clans API and announce war
     |dwastar | Star|
     |dwastarnew | New Star|
     |dwastarempty | Empty Star|
+
+** If hosting the bot yourself, after uploading them to your servers, 
+get the emoji IDs in discord like this for each: `\:dwasword:` & replace the IDs in index.js.
+You need to invite the bot to a 2nd server to make use of all emojis, server limit is 50.
 1. ***Q:*** *Can I use this bot to call bases?*  
 ***A:*** No not at this time.
 1. ***Q:*** *Will this bot keep detailed statistics of our wars?*  
