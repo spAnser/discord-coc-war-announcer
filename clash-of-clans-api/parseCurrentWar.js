@@ -51,7 +51,7 @@ module.exports = function parseCurrentWar(data, overrideConfig = {}) {
         data.clan.members.forEach(member => {
             Players[member.tag] = member
             if (member.attacks) {
-                if (member.attacks.length != 2) {
+                if (member.attacks.length != (overrideConfig.availableAttacks || 2)) {
                     PlayersMissingAtack.push(member)
                 }
                 member.attacks.forEach(attack => {

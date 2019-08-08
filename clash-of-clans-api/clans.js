@@ -80,6 +80,7 @@ module.exports = class Clan {
   }
 
   fetchCurrentLeague(apiQueue, done = () => {}, overrideConfig = {}) {
+    overrideConfig = { ...overrideConfig, ...{ availableAttacks: 1 } }
     apiQueue.push({
       url: `${COC_API_BASE}/clans/${encodeURIComponent(this.getTag())}/currentwar/leaguegroup`,
       done: (data) => {
