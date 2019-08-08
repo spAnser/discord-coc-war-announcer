@@ -589,17 +589,15 @@ global.discordMissingAttackMessage = (clanTag, channelId, PlayersMissingAtack) =
     PlayersMissingAtack.forEach(member => {
       const embed = new Discord.RichEmbed()
         if (!member.attacks) {
-                embed.setTitle(Clans[clanTag].name + ' vs ' + Clans[clanTag].opponent.name)
-                .setFooter(clanTag + ' vs ' + Clans[clanTag].opponent.tag)
-                .addField(member.name + " has not attacked!!!", member.tag)
-                .setColor(0xFF484E)
+            embed.setTitle(Clans[clanTag].name + ' vs ' + Clans[clanTag].opponent.name)
+              .setFooter(clanTag + ' vs ' + Clans[clanTag].opponent.tag)
+              .addField(member.name + " has not attacked!!!", member.tag)
+              .setColor(0xFF484E)
         } else {
-            if (isCWL != true && (member.attacks.length != 2)) {
-                    embed.setTitle(Clans[clanTag].name + ' vs ' + Clans[clanTag].opponent.name)
-                    .setFooter(clanTag + ' vs ' + Clans[clanTag].opponent.tag)
-                    .addField(member.name + " is missing 1 attack!", member.tag)
-                    .setColor(0xFFBC48)
-          }
+          embed.setTitle(Clans[clanTag].name + ' vs ' + Clans[clanTag].opponent.name)
+            .setFooter(clanTag + ' vs ' + Clans[clanTag].opponent.tag)
+            .addField(member.name + " is missing 1 attack!", member.tag)
+            .setColor(0xFFBC48)
         }
       getChannelById(channelId, discordChannel => {
         if (discordChannel) {
